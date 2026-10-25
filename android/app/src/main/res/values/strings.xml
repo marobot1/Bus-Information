@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">할머니 버스</string>
+    <string name="title_activity_main">할머니 버스</string>
+    <string name="package_name">kr.family.grandmabus</string>
+    <string name="custom_url_scheme">kr.family.grandmabus</string>
+</resources>

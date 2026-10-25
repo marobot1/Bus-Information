@@ -1,0 +1,1292 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2F62F5"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><style>html,body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}</style><script>window.BUS_HOSTED=true</script></head><body><title>할머니 버스 시간</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap">
+<style>
+/* Layout: soft-UI phone app. Two modes (편리 = big type, one thing at a time / 일반 = denser transit-app layout) and light/dark themes.
+   Screens: 홈, 읍 가는 버스, 삼천포 가는 버스, 집 가는 버스, 시간표, 알림, 설정. Floating gradient tab bar with raised center button. */
+:root{
+  color-scheme:light;
+  --bg:#E8EDF5; --surface:#FFFFFF; --surface-2:#F3F6FB; --ink:#172033; --muted:#6F7B92; --line:#E1E7F0; --track:#E6EBF3;
+  --blue:#2F62F5; --blue-soft:#E6EEFF; --blue-line:#C6D6FF; --link:#2456E8;
+  --ok:#0E8752; --ok-soft:#DFF3E8; --warn:#B26200; --warn-soft:#FFEFD5; --late:#D3343B; --late-soft:#FDE3E3;
+  --note-ink:#7A4600; --on-grad:#FFFFFF; --on-grad-dim:rgba(255,255,255,.76);
+  --toast:#172033; --on-toast:#FFFFFF; --scrim:rgba(15,22,38,.45);
+  --blob1:#D3E1FF; --blob2:#E2DDFF;
+  --grad:linear-gradient(140deg,#56ADFF 0%,#2F62F5 72%);
+  --shadow:0 16px 32px -14px rgba(34,62,128,.24),0 3px 8px -3px rgba(34,62,128,.08);
+  --shadow-sm:0 8px 18px -10px rgba(34,62,128,.28);
+  --inset:inset 0 2px 6px rgba(34,62,128,.10);
+  --f-num:"Poppins","Noto Sans KR",system-ui,sans-serif;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0D1321; --surface:#171F31; --surface-2:#1E283D; --ink:#EDF1F8; --muted:#97A3BA; --line:#283350; --track:#243049;
+  --blue:#6B97FF; --blue-soft:#1C2A4F; --blue-line:#34497C; --link:#8EB0FF;
+  --ok:#4BD996; --ok-soft:#113524; --warn:#FFB54A; --warn-soft:#382811; --late:#FF7C81; --late-soft:#3E181B;
+  --note-ink:#FFD08C; --toast:#EDF1F8; --on-toast:#0D1321; --scrim:rgba(0,0,0,.6);
+  --blob1:rgba(54,88,190,.35); --blob2:rgba(96,66,170,.28);
+  --grad:linear-gradient(140deg,#4F9EFF 0%,#3561EE 72%);
+  --shadow:0 16px 32px -14px rgba(0,0,0,.6),0 3px 8px -3px rgba(0,0,0,.35);
+  --shadow-sm:0 8px 18px -10px rgba(0,0,0,.6); --inset:inset 0 2px 6px rgba(0,0,0,.35)}}
+:root[data-theme="dark"],:root.t-dark{
+  color-scheme:dark;
+  --bg:#0D1321; --surface:#171F31; --surface-2:#1E283D; --ink:#EDF1F8; --muted:#97A3BA; --line:#283350; --track:#243049;
+  --blue:#6B97FF; --blue-soft:#1C2A4F; --blue-line:#34497C; --link:#8EB0FF;
+  --ok:#4BD996; --ok-soft:#113524; --warn:#FFB54A; --warn-soft:#382811; --late:#FF7C81; --late-soft:#3E181B;
+  --note-ink:#FFD08C; --toast:#EDF1F8; --on-toast:#0D1321; --scrim:rgba(0,0,0,.6);
+  --blob1:rgba(54,88,190,.35); --blob2:rgba(96,66,170,.28);
+  --grad:linear-gradient(140deg,#4F9EFF 0%,#3561EE 72%);
+  --shadow:0 16px 32px -14px rgba(0,0,0,.6),0 3px 8px -3px rgba(0,0,0,.35);
+  --shadow-sm:0 8px 18px -10px rgba(0,0,0,.6); --inset:inset 0 2px 6px rgba(0,0,0,.35)}
+:root.t-light{
+  color-scheme:light;
+  --bg:#E8EDF5; --surface:#FFFFFF; --surface-2:#F3F6FB; --ink:#172033; --muted:#6F7B92; --line:#E1E7F0; --track:#E6EBF3;
+  --blue:#2F62F5; --blue-soft:#E6EEFF; --blue-line:#C6D6FF; --link:#2456E8;
+  --ok:#0E8752; --ok-soft:#DFF3E8; --warn:#B26200; --warn-soft:#FFEFD5; --late:#D3343B; --late-soft:#FDE3E3;
+  --note-ink:#7A4600; --toast:#172033; --on-toast:#FFFFFF; --scrim:rgba(15,22,38,.45);
+  --blob1:#D3E1FF; --blob2:#E2DDFF;
+  --grad:linear-gradient(140deg,#56ADFF 0%,#2F62F5 72%);
+  --shadow:0 16px 32px -14px rgba(34,62,128,.24),0 3px 8px -3px rgba(34,62,128,.08);
+  --shadow-sm:0 8px 18px -10px rgba(34,62,128,.28); --inset:inset 0 2px 6px rgba(34,62,128,.10)}
+
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{min-height:100%;color:var(--ink);font-family:var(--f-body);font-size:var(--fs,17px);line-height:1.45;-webkit-text-size-adjust:100%;word-break:keep-all;
+  background:radial-gradient(560px 380px at 108% -6%,var(--blob1) 0%,transparent 70%),radial-gradient(520px 420px at -18% 104%,var(--blob2) 0%,transparent 70%),var(--bg);
+  transition:background-color .3s}
+body.m-easy{--fs:18px;--t1:27px;--t2:21px;--ring:224px;--rn:42px}
+body.m-normal{--fs:15.5px;--t1:23px;--t2:18px;--ring:132px;--rn:26px}
+button,input,select{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
+a{-webkit-tap-highlight-color:transparent;color:var(--link)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+[data-act]{cursor:pointer}
+
+.app{max-width:500px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px calc(130px + env(safe-area-inset-bottom,0px))}
+body.alarming .app{padding-bottom:calc(200px + env(safe-area-inset-bottom,0px))}
+#main{display:flex;flex-direction:column;gap:16px}
+.m-easy #main{gap:18px}
+#main.enter>*{animation:rise .42s var(--ease) both}
+#main.enter>*:nth-child(2){animation-delay:.04s}#main.enter>*:nth-child(3){animation-delay:.08s}#main.enter>*:nth-child(4){animation-delay:.12s}#main.enter>*:nth-child(n+5){animation-delay:.16s}
+@keyframes rise{from{opacity:.25;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+.card{background:var(--surface);border-radius:24px;box-shadow:var(--shadow);padding:18px}
+.m-easy .card{border-radius:26px;padding:20px}
+.sec{font-size:var(--t2);font-weight:900;margin:4px 2px -4px;letter-spacing:-.01em}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.card-h h2{margin:0;font-size:calc(var(--t2) - 2px);font-weight:900}
+.card-h span,.card-h button.lnk{font-size:13.5px;color:var(--muted);font-weight:700;text-align:right}
+.lnk{appearance:none;border:0;background:none;padding:6px 0;color:var(--link)!important;font-weight:800!important}
+.hint{font-size:14.5px;color:var(--muted);font-weight:500;margin:0;line-height:1.5}
+
+/* top */
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:6px 2px 0}
+.hello{margin:0;color:var(--muted);font-size:15px;font-weight:600}
+.today{margin:2px 0 0;font-size:var(--t1);font-weight:900;letter-spacing:-.02em;line-height:1.2}
+.clock{flex:none;background:var(--surface);border-radius:999px;padding:8px 14px;box-shadow:var(--shadow-sm);font-weight:700;font-size:15px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.clock .num{font-weight:600}
+.livedot{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:ping 2s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 60%,transparent)}80%,100%{box-shadow:0 0 0 7px transparent}}
+
+/* tiles (easy) */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tile{appearance:none;border:0;text-align:left;min-height:178px;border-radius:26px;padding:18px 16px 16px;background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;min-width:0;transition:transform .18s var(--ease)}
+.tile:active,.qa:active,.btn:active,.pill:active,.row:not(.static):active{transform:scale(.97)}
+.tile-ic{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;background:var(--blue-soft);color:var(--blue);margin-bottom:8px}
+.tile-ic svg{width:27px;height:27px}
+.tile-t{font-size:21px;font-weight:900;letter-spacing:-.02em;line-height:1.2}
+.tile-s{font-size:14px;color:var(--muted);font-weight:600}
+.tile-n{margin-top:auto;padding-top:8px;font-size:16px;font-weight:800;color:var(--blue);line-height:1.3}
+.tile-n em{display:block;font-style:normal;font-size:14px;font-weight:700;opacity:.85;font-variant-numeric:tabular-nums}
+.tile--hi{background:var(--grad);color:var(--on-grad);box-shadow:0 18px 30px -14px rgba(47,98,245,.6)}
+.tile--hi .tile-ic{background:rgba(255,255,255,.22);color:var(--on-grad)}
+.tile--hi .tile-s{color:var(--on-grad-dim)}
+.tile--hi .tile-n{color:var(--on-grad)}
+
+/* quick actions (normal) */
+.qas{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.qa{appearance:none;border:0;border-radius:20px;padding:14px 12px;background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;text-align:left;min-width:0;transition:transform .18s var(--ease)}
+.qa .ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--blue-soft);color:var(--blue)}
+.qa .ic svg{width:22px;height:22px}
+.qa b{font-size:15px;font-weight:900;line-height:1.25}
+.qa span{font-size:12.5px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.qa--hi{background:var(--grad);color:var(--on-grad)}
+.qa--hi .ic{background:rgba(255,255,255,.22);color:var(--on-grad)}
+.qa--hi span{color:var(--on-grad-dim)}
+
+/* rows */
+.deps{list-style:none;margin:0;padding:0}
+.deps li{border-top:1px solid var(--line)}
+.deps li:first-child{border-top:0}
+.row{appearance:none;border:0;background:none;width:100%;text-align:left;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px 0;transition:transform .18s var(--ease)}
+.row.static{cursor:default}
+.dt{font-size:22px;font-weight:600;line-height:1}
+.m-easy .dt{font-size:24px}
+.dt small{font-family:var(--f-body);font-size:12.5px;font-weight:700;color:var(--muted);margin-right:4px;vertical-align:3px}
+.dmid{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
+.via{font-size:13.5px;color:var(--muted);font-weight:600}
+.dl{font-size:14.5px;font-weight:800;color:var(--blue);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.dl small{display:block;font-size:12px;color:var(--muted);font-weight:700}
+.rt{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center}
+.rt .nm{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-weight:800}
+.rt .sub{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-top:4px}
+
+.plate{display:inline-flex;align-items:baseline;gap:1px;background:var(--grad);color:var(--on-grad);border-radius:12px;padding:6px 12px 5px;font-family:var(--f-num);font-weight:700;font-size:22px;line-height:1;box-shadow:var(--shadow-sm);white-space:nowrap}
+.plate small{font-family:var(--f-body);font-size:.6em;font-weight:800}
+.plate.sm{font-size:14.5px;padding:5px 9px 4px;border-radius:9px;box-shadow:none}
+.kind{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:12.5px;font-weight:900;white-space:nowrap;line-height:1.4}
+.k-fast{background:var(--ok-soft);color:var(--ok)}
+.k-slow{background:var(--warn-soft);color:var(--warn)}
+.k-sea{background:var(--blue-soft);color:var(--blue)}
+.k-live{background:var(--ok-soft);color:var(--ok)}
+.k-live::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;animation:blink 1.6s infinite}
+.k-tt{background:var(--surface-2);color:var(--muted)}
+@keyframes blink{50%{opacity:.25}}
+
+/* bar */
+.bar{display:flex;align-items:center;gap:12px;padding-top:4px}
+.iconbtn{appearance:none;border:0;width:46px;height:46px;border-radius:15px;background:var(--surface);box-shadow:var(--shadow-sm);display:grid;place-items:center;flex:none}
+.iconbtn svg{width:23px;height:23px}
+.bar h1{margin:0;font-size:var(--t1);font-weight:900;letter-spacing:-.02em;line-height:1.2}
+.bar p{margin:0;font-size:13.5px;color:var(--muted);font-weight:600}
+
+/* pills */
+.pills{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin:0 -2px -8px;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{appearance:none;border:0;flex:none;min-height:48px;padding:8px 15px;border-radius:17px;background:var(--surface);box-shadow:var(--shadow-sm);font-size:16px;font-weight:900;white-space:nowrap;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;line-height:1.2;transition:transform .18s var(--ease),background .25s}
+.pill small{font-weight:700;color:var(--muted);font-size:12px}
+.pill[aria-pressed="true"]{background:var(--grad);color:var(--on-grad)}
+.pill[aria-pressed="true"] small{color:var(--on-grad-dim)}
+
+/* location */
+.loc{display:flex;flex-direction:column;gap:6px}
+.loc-lab{font-size:14px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px}
+.loc-lab svg{width:18px;height:18px;color:var(--blue);flex:none}
+.loc-name{font-size:calc(var(--t1) + 1px);font-weight:900;letter-spacing:-.02em;line-height:1.2}
+.loc-meta{font-size:15px;color:var(--muted);font-weight:600}
+.loc-act{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.btn{appearance:none;border:0;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:11px 16px;border-radius:16px;font-size:16px;font-weight:800;text-decoration:none;color:var(--link);background:var(--blue-soft);text-align:center;transition:transform .18s var(--ease),background .25s}
+.m-easy .btn{min-height:54px;font-size:17px}
+.btn svg{width:20px;height:20px;flex:none}
+.btn--pri{background:var(--grad);color:var(--on-grad)!important;box-shadow:var(--shadow-sm)}
+.btn--on{background:var(--late-soft);color:var(--late)}
+.btn--ghost{background:var(--surface-2);color:var(--ink)}
+.btn--big{width:100%;min-height:60px;font-size:19px;border-radius:20px}
+.locating{display:flex;align-items:center;gap:14px;font-size:18px;font-weight:800}
+.pulse{width:18px;height:18px;border-radius:50%;background:var(--blue);animation:pulse 1.4s infinite;flex:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--blue) 50%,transparent)}70%,100%{box-shadow:0 0 0 16px transparent}}
+.places{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.place{appearance:none;border:0;padding:10px 14px;border-radius:14px;background:var(--surface-2);font-size:15px;font-weight:800;min-height:44px}
+details.pick summary{font-size:16px;font-weight:900;list-style:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+details.pick summary::-webkit-details-marker{display:none}
+details.pick summary::after{content:"펼치기";font-size:13.5px;color:var(--link);font-weight:800}
+details.pick[open] summary::after{content:"접기"}
+.pick .half{font-size:13.5px;font-weight:800;color:var(--muted);margin:16px 2px 0}
+
+/* main bus card */
+.main{display:flex;flex-direction:column;gap:14px}
+.main-top{display:flex;flex-direction:column;align-items:center;gap:14px}
+.m-normal .main-top{display:grid;grid-template-columns:var(--ring) minmax(0,1fr);align-items:center;gap:16px}
+.ring{position:relative;width:var(--ring);height:var(--ring);max-width:100%;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .trk{stroke:var(--track)}
+.ring .val{transition:stroke-dashoffset 1s linear,stroke .4s}
+.ring-in{position:absolute;inset:12.5%;border-radius:50%;background:var(--surface);box-shadow:var(--inset),0 10px 22px -10px rgba(34,62,128,.30);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 6px}
+.ring-big{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:600;line-height:1;letter-spacing:-.02em;white-space:nowrap}
+.ring-big .n{font-size:var(--rn)}
+.ring-big .u{font-family:var(--f-body);font-size:calc(var(--rn) * .4);font-weight:800;margin:0 2px 0 1px}
+.ring-big .w{font-family:var(--f-body);font-size:calc(var(--rn) * .75);font-weight:900}
+.ring-sm{font-size:13.5px;font-weight:700;color:var(--muted);margin-top:5px}
+.m-normal .ring-sm{font-size:11.5px;margin-top:3px}
+.info{display:flex;flex-direction:column;gap:10px;align-items:center;width:100%;min-width:0}
+.m-normal .info{align-items:stretch}
+.st{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font-weight:900;font-size:16px;background:var(--s-soft);color:var(--s);align-self:center;transition:background .3s,color .3s}
+.m-easy .st{font-size:18px}
+.m-normal .st{align-self:flex-start;font-size:14px;padding:6px 12px}
+.st::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor}
+.s-ok{--s:var(--ok);--s-soft:var(--ok-soft)}
+.s-warn{--s:var(--warn);--s-soft:var(--warn-soft)}
+.s-late{--s:var(--late);--s-soft:var(--late-soft)}
+.s-done{--s:var(--muted);--s-soft:var(--surface-2)}
+.srcwrap{align-self:center}
+.m-normal .srcwrap{align-self:flex-start}
+.facts{width:100%;display:grid;grid-template-columns:auto 1fr;gap:0 14px;align-items:center;background:var(--surface-2);border-radius:18px;padding:2px 16px;margin:0}
+.m-normal .facts{background:none;padding:0;border-radius:0}
+.facts dt{font-size:14px;font-weight:700;color:var(--muted);padding:12px 0}
+.facts dd{margin:0;justify-self:end;text-align:right;font-size:19px;font-weight:900;padding:12px 0;min-width:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.m-normal .facts dt{padding:7px 0;font-size:13px}
+.m-normal .facts dd{padding:7px 0;font-size:16px}
+.facts dt:not(:first-of-type),.facts dt:not(:first-of-type)+dd{border-top:1px solid var(--line)}
+.facts .num{font-weight:600;font-size:1.1em}
+.facts dd small{font-size:13px;font-weight:700;color:var(--muted)}
+.facts .pk{display:flex;align-items:center;gap:6px;flex-direction:row;flex-wrap:wrap;justify-content:flex-end}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.alnote{font-size:13px;color:var(--muted);font-weight:600;text-align:center;margin:-4px 0 0}
+
+/* timeline */
+.tl{list-style:none;margin:6px 0 0;padding:0}
+.tl li{position:relative;padding:0 0 16px 36px}
+.m-normal .tl li{padding-bottom:12px}
+.tl li::before{content:"";position:absolute;left:10px;top:24px;bottom:0;width:3px;border-radius:3px;background:var(--blue-line)}
+.tl li:last-child{padding-bottom:0}
+.tl li:last-child::before{display:none}
+.tl .dot{position:absolute;left:2px;top:4px;width:19px;height:19px;border-radius:50%;background:var(--surface);border:3px solid var(--blue)}
+.tl li.on .dot{background:var(--grad);border:0;box-shadow:0 0 0 5px var(--blue-soft)}
+.tl li.end .dot{background:var(--blue)}
+.tl li.out{opacity:.5}
+.tl li.out .dot{border-color:var(--blue-line)}
+.tl li.out::before{background:var(--line)}
+.tl .nm{font-size:17px;font-weight:900;display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.3}
+.m-normal .tl .nm{font-size:15.5px}
+.tl .tm{font-size:13.5px;color:var(--muted);font-weight:600}
+.tl li.gap .dot{border:0;background:none}
+.tl li.gap .dot::after{content:"";position:absolute;left:6px;top:2px;width:4px;height:16px;background:radial-gradient(circle,var(--blue) 2px,transparent 2.5px) 0 0/4px 6px repeat-y}
+.tl li.gap button{appearance:none;border:0;background:var(--blue-soft);color:var(--link);font-weight:800;font-size:14px;padding:7px 12px;border-radius:12px}
+.busic{position:absolute;left:-3px;top:-2px;width:29px;height:29px;border-radius:10px;background:var(--grad);color:var(--on-grad);display:grid;place-items:center;box-shadow:0 6px 14px -4px rgba(47,98,245,.6);animation:bob 2.4s ease-in-out infinite;z-index:1}
+.busic svg{width:18px;height:18px}
+@keyframes bob{50%{transform:translateY(-2px)}}
+.tl li.bus .nm{font-size:14.5px;color:var(--link)}
+.tl.full li{animation:fadein .35s var(--ease) both}
+@keyframes fadein{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+.buspos{display:flex;align-items:center;gap:8px;background:var(--surface-2);border-radius:14px;padding:10px 12px;font-size:14.5px;font-weight:700;margin-bottom:10px}
+.buspos svg{width:20px;height:20px;color:var(--blue);flex:none}
+
+.note{border-radius:18px;padding:13px 15px;background:var(--warn-soft);color:var(--note-ink);font-size:14.5px;font-weight:600;line-height:1.5}
+.note b{font-weight:900}
+.empty{text-align:center;padding:18px 6px;color:var(--muted);font-weight:600}
+.empty b{display:block;color:var(--ink);font-size:18px;font-weight:900;margin-bottom:4px}
+
+/* timetable */
+.tt-h{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.tt-t{font-size:18px;font-weight:900;line-height:1.25}
+.tt-s{font-size:13.5px;color:var(--muted);font-weight:600}
+.half{font-size:13.5px;font-weight:800;color:var(--muted);margin:14px 2px 8px}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
+.chip{border-radius:14px;background:var(--surface-2);padding:9px 4px 8px;text-align:center;font-size:18px;font-weight:600;line-height:1.15}
+.chip small{display:block;font-family:var(--f-body);font-size:11px;font-weight:800;color:var(--link);margin-top:2px}
+.chip.past{color:var(--muted);opacity:.45;text-decoration:line-through}
+.chip.nxt{background:var(--grad);color:var(--on-grad);box-shadow:var(--shadow-sm)}
+.chip.nxt small{color:var(--on-grad)}
+
+/* settings */
+.set{display:flex;flex-direction:column}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.set .card-h+.set-row{border-top:0}
+.set-row .l{display:flex;flex-direction:column;gap:2px;min-width:0}
+.set-row .l b{font-size:16px;font-weight:800}
+.set-row .l span{font-size:13px;color:var(--muted);font-weight:600}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:14px;padding:4px;gap:4px;flex:none;max-width:100%;overflow-x:auto}
+.seg button{appearance:none;border:0;background:none;padding:8px 12px;border-radius:11px;font-size:14px;font-weight:800;color:var(--muted);transition:background .2s,color .2s;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm)}
+.field{width:100%;min-height:46px;border-radius:14px;border:1px solid var(--line);background:var(--surface-2);padding:10px 12px;font-size:15px;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.stack{display:flex;flex-direction:column;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.log{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--surface-2);border-radius:12px;padding:10px;white-space:pre-wrap;word-break:break-all;max-height:220px;overflow:auto;margin:0;color:var(--ink)}
+
+/* toast, alarm bar, sheet */
+.toast{position:fixed;left:0;right:0;top:0;z-index:30;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:calc(12px + env(safe-area-inset-top,0px));pointer-events:none}
+.toast-in{pointer-events:auto;max-width:468px;margin:0 auto;background:var(--toast);color:var(--on-toast);border-radius:22px;padding:15px 18px;box-shadow:0 20px 40px -12px rgba(0,0,0,.45);display:flex;gap:14px;align-items:center;animation:drop .35s var(--ease)}
+.toast-in svg{width:28px;height:28px;flex:none;color:#F5B400}
+.toast-in b{display:block;font-size:18px;font-weight:900;line-height:1.3}
+.toast-in span{font-size:14px;opacity:.8;font-weight:600}
+@keyframes drop{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+.tabbar{position:fixed;left:0;right:0;bottom:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));pointer-events:none;z-index:5}
+.abar{pointer-events:auto;max-width:468px;margin:0 auto 22px;background:var(--surface);border-radius:20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;animation:drop .3s var(--ease)}
+.abar svg{width:22px;height:22px;color:var(--late);flex:none;animation:ring 2s infinite}
+@keyframes ring{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(14deg)}90%{transform:rotate(-12deg)}95%{transform:rotate(8deg)}}
+.abar .t{flex:1;min-width:0;font-size:14.5px;font-weight:800;line-height:1.3}
+.abar .t span{display:block;color:var(--link);font-variant-numeric:tabular-nums}
+.abar button{appearance:none;border:0;background:var(--late-soft);color:var(--late);font-weight:900;font-size:14.5px;border-radius:12px;padding:10px 14px;flex:none}
+.tabbar-in{pointer-events:auto;max-width:468px;margin:0 auto;height:72px;border-radius:26px;background:var(--grad);box-shadow:0 18px 30px -12px rgba(47,98,245,.55);display:grid;grid-template-columns:repeat(5,1fr);align-items:center}
+.tab{appearance:none;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--on-grad-dim);font-size:11.5px;font-weight:800;padding:8px 0;transition:color .2s;white-space:nowrap}
+.tab svg{width:23px;height:23px;transition:transform .25s var(--ease)}
+.tab[aria-current="page"]{color:var(--on-grad)}
+.tab[aria-current="page"] svg{transform:translateY(-2px)}
+.tab--c .cbtn{width:58px;height:58px;border-radius:50%;background:var(--surface);color:var(--blue);display:grid;place-items:center;margin-top:-32px;box-shadow:0 10px 20px -6px rgba(0,0,0,.4),0 0 0 6px rgba(255,255,255,.3)}
+.tab--c .cbtn svg{width:27px;height:27px}
+.tab--c{color:var(--on-grad)}
+.m-easy .tab{font-size:12px}
+.sheet{position:fixed;inset:0;z-index:40;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));animation:fade .25s ease}
+.sheet-in{width:100%;max-width:468px;background:var(--surface);border-radius:28px;padding:22px;display:flex;flex-direction:column;gap:12px;animation:up .35s var(--ease)}
+.sheet h2{margin:0;font-size:23px;font-weight:900}
+.choice{appearance:none;border:2px solid var(--line);background:var(--surface-2);border-radius:20px;padding:16px;text-align:left;display:flex;gap:14px;align-items:center}
+.choice .ic{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:var(--blue-soft);color:var(--blue);flex:none}
+.choice .ic svg{width:26px;height:26px}
+.choice b{display:block;font-size:18px;font-weight:900}
+.choice span{font-size:14px;color:var(--muted);font-weight:600}
+@keyframes fade{from{opacity:0}}
+@keyframes up{from{transform:translateY(40px)}}
+
+@media (max-width:360px){.tile-t{font-size:19px}body.m-easy{--ring:204px;--rn:36px}.qa b{font-size:14px}.tab{font-size:10.5px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app"><main id="main"></main></div>
+<div class="toast" id="toast" role="status" aria-live="assertive" hidden></div>
+<div id="sheet"></div>
+<nav class="tabbar" aria-label="메뉴">
+  <div class="abar" id="abar" hidden></div>
+  <div class="tabbar-in" id="tabs"></div>
+</nav>
+
+<script>
+/* ===================== 설정 · 시간표 =====================
+   times = 삼정그린코아(집 앞) 정류장 시간 (2024.1.1 시간표)
+   seq   = [정류장, 집 앞 기준 몇 분 전(-)/후(+)]  ← 중간 정류장 시간은 거리로 추정
+   사천터미널 출발 = 230번 집 앞 -25분, 230-1번 -5분 (노선표와 일치)
+========================================================== */
+const APP_VER = "2.1";
+const ALERTS = [30, 25, 20, 15, 10, 5, 3];
+// 설치 앱을 만들 때 GitHub 시크릿에서 키가 들어가요 (저장소 코드에는 키가 없어요)
+const BUILD = { tago:"__TAGO_KEY__", gtts:"__GTTS_KEY__" };
+const bk = v => (v && v.indexOf("__") !== 0) ? v : "";
+// 구글 AI 목소리 (Chirp 3 HD · Neural2)
+const GVOICES = [
+  ["ko-KR-Chirp3-HD-Aoede", "여성 · 산뜻한"], ["ko-KR-Chirp3-HD-Sulafat", "여성 · 따뜻한"], ["ko-KR-Chirp3-HD-Vindemiatrix", "여성 · 다정한"],
+  ["ko-KR-Chirp3-HD-Achernar", "여성 · 부드러운"], ["ko-KR-Chirp3-HD-Kore", "여성 · 또렷한"], ["ko-KR-Chirp3-HD-Leda", "여성 · 밝은"],
+  ["ko-KR-Chirp3-HD-Charon", "남성 · 차분한"], ["ko-KR-Chirp3-HD-Achird", "남성 · 친근한"], ["ko-KR-Chirp3-HD-Puck", "남성 · 경쾌한"],
+  ["ko-KR-Neural2-A", "여성 · 기본"], ["ko-KR-Neural2-C", "남성 · 기본"]
+];
+
+const STOPS = {
+  home:{name:"삼정그린코아",tag:"집 앞",lat:35.075265,lng:128.071717},
+  terminal:{name:"사천터미널",lat:35.078663,lng:128.096117},
+  sorimsa:{name:"사천터미널(소림사)",lat:35.078958,lng:128.09585},
+  sacheonhs:{name:"사천고",lat:35.08702,lng:128.096015},
+  stadium:{name:"사천공설운동장",lat:35.089742,lng:128.094291},
+  church:{name:"사천성당",lat:35.085566,lng:128.086296},
+  post:{name:"사천우체국",lat:35.083473,lng:128.08604},
+  hanbo:{name:"한보3차",lat:35.075243,lng:128.08432},
+  kkum:{name:"꿈에그린",lat:35.070573,lng:128.078564},
+  wolseong:{name:"월성1리",lat:35.0655,lng:128.083},
+  switzen:{name:"스위첸",lat:35.062071,lng:128.086801},
+  riga:{name:"리가",lat:35.062024,lng:128.076819},
+  jinsa:{name:"진사주공",lat:35.063383,lng:128.065906},
+  jodong:{name:"조동사거리",lat:35.065189,lng:128.06535},
+  yucheon:{name:"유천사거리",lat:35.069216,lng:128.066961},
+  daebang:{name:"대방빌리지",lat:35.076104,lng:128.073932},
+  yongdang:{name:"용당마을",lat:35.080826,lng:128.078015},
+  waryong:{name:"와룡스포츠",lat:35.082191,lng:128.080214},
+  topmart:{name:"탑마트",lat:35.079438,lng:128.087063},
+  suyang:{name:"수양초",lat:35.078586,lng:128.08967},
+  girlshs:{name:"사천여고",lat:35.080237,lng:128.087888},
+  prugio:{name:"푸르지오",lat:35.062459,lng:128.064803},
+  elcru:{name:"엘크루",lat:35.061286,lng:128.068098},
+  hanju:{name:"한주빌라트",lat:35.067697,lng:128.079144},
+  oldterm:{name:"구사천터미널",lat:35.082598,lng:128.08605},
+  registry:{name:"구사천등기소",lat:35.087692,lng:128.09251},
+  sacheonms:{name:"사천중",lat:35.080493,lng:128.097708},
+  samcheonpo:{name:"삼천포터미널",lat:34.939071,lng:128.079759}
+};
+
+const ROUTES = [
+  { id:"r230", no:"230", startExact:true, out:"바로 나가는 버스", outK:"fast", outShort:"바로 · 읍", homeLabel:"돌아서 가는 버스",
+    outNote:"탑마트 거쳐 사천터미널까지 약 8분",
+    seq:[["terminal",-25],["sacheonhs",-22],["stadium",-21],["church",-19],["post",-18],["hanbo",-15],["kkum",-13],["wolseong",-11],["switzen",-10],["riga",-7],["jinsa",-5],["jodong",-4],["yucheon",-2],["home",0],["daebang",1],["yongdang",2],["waryong",3],["topmart",5],["suyang",6],["terminal",8]],
+    times:["06:55","08:40","10:10","11:15","11:40","13:10","14:40","16:10","17:25","18:25","19:55","21:25","22:10"] },
+  { id:"r2301", no:"230-1", startExact:true, out:"돌아서 나가는 버스", outK:"slow", outShort:"돌아서 · 읍", homeLabel:"바로 가는 버스",
+    outNote:"푸르지오·한보3차 돌아서 사천터미널까지 약 26분",
+    seq:[["sorimsa",-5],["girlshs",-4],["waryong",-2],["daebang",-1],["home",0],["yucheon",2],["prugio",5],["elcru",6],["riga",8],["switzen",10],["wolseong",12],["hanju",13],["hanbo",16],["oldterm",18],["post",19],["church",19],["registry",21],["stadium",22],["sacheonhs",23],["sacheonms",25],["terminal",26]],
+    times:["07:20","07:25","07:35","09:05","10:35","11:40","12:05","13:35","15:35","16:50","18:50","20:20"] },
+  { id:"r111e", no:"111", out:"돌아서 나가는 버스", outK:"slow", outShort:"돌아서 · 읍", homeLabel:"삼천포에서 오는 버스",
+    outNote:"삼천포에서 와서 사천으로 돌아서 가요 · 오래 걸려요",
+    seq:[["samcheonpo",-30],["home",0]],
+    times:["07:45","11:35","15:35","17:15","20:15"] },
+  { id:"r111s", no:"111", out:"삼천포 가는 버스", outK:"sea", outShort:"삼천포행", homeLabel:"",
+    outNote:"삼천포터미널까지 약 30분",
+    seq:[["home",0],["samcheonpo",30]],
+    times:["06:35",{t:"08:00",no:"228"},"11:15","13:25","15:15","17:55","21:25"] }
+];
+const EUP = ["r230", "r2301", "r111e"];
+const PLACES = [
+  {name:"다이소 사천대로점",lat:35.0631875,lng:128.0739477},
+  {name:"다이소 사천평화점",lat:35.0821758,lng:128.0881381},
+  {name:"탑마트",lat:35.0794375,lng:128.0870625},
+  {name:"사천터미널",lat:35.0786634,lng:128.0961168},
+  {name:"한보3차",lat:35.0752433,lng:128.0843204},
+  {name:"리가 아파트",lat:35.063078,lng:128.0776269},
+  {name:"삼천포터미널",lat:34.939071,lng:128.079759},
+  {name:"다이소 삼천포점",lat:34.9385309,lng:128.0854193}
+];
+/* ======================================================== */
+
+/* ---------- 저장 · 플랫폼 ---------- */
+const DEF = { mode:null, theme:"auto", voice:"", rate:1, sound:"both", tagoKey:"", proxy:"", homeWalk:5, liveOff:false, tts: bk(BUILD.gtts) ? "google" : "device", gKey:"", gVoice:"ko-KR-Chirp3-HD-Aoede" };
+const store = { get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+const SET = Object.assign({}, DEF, store.get("busapp.set", {}));
+const saveSet = () => store.set("busapp.set", SET);
+const CAP = window.Capacitor;
+const NATIVE = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
+const PREVIEW = !NATIVE && !window.BUS_HOSTED;   // Claude 미리보기: 외부 API 호출이 막혀 있어요
+const tagoKey = () => SET.tagoKey || (SET.liveOff ? "" : bk(BUILD.tago));
+const gKey = () => SET.gKey || bk(BUILD.gtts);
+const plug = n => { try { return NATIVE ? (CAP.Plugins[n] || (CAP.registerPlugin && CAP.registerPlugin(n))) : null; } catch (e) { return null; } };
+
+const WEEK = ["일","월","화","수","목","금","토"];
+const $main = document.getElementById("main");
+const S = { view:"main", eupSel:"r230", homeSel:null, pos:null, locating:false, locErr:false, tt:"r230", tlOpen:false, speech:"", alarm:null, hiddenAt:0, extNav:false, liveLog:[] };
+let depth = 0, lastMin = -1, wake = null, toastTimer = null, NEED = null;
+const R = id => ROUTES.find(r => r.id === id);
+
+const ic = {
+  bus:'<path d="M6 3h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M4 11h16M7 18v2.5M17 18v2.5M8 14.5h.01M16 14.5h.01"/>',
+  sea:'<circle cx="12" cy="8" r="3.2"/><path d="M2 14c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 19c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/>',
+  home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+  grid:'<rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/>',
+  cal:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4M7 13h3M7 17h3M14 13h3M14 17h3"/>',
+  pin:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  spk:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>',
+  walk:'<circle cx="13" cy="4" r="2"/><path d="M10 21l2-6 3 3v3M8 12l3-4 4 2 2 3M11 8l-1 5"/>',
+  re:'<path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/>',
+  bell:'<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  bellOff:'<path d="M8.7 3A6 6 0 0 1 18 8c0 2.4.4 4.2 1 5.6M17 17H3s3-2 3-9c0-.6.1-1.2.3-1.7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0M2 2l20 20"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  big:'<path d="M4 20h4M6 20V6M2.5 9 6 5.5 9.5 9"/><path d="M12 20l4.5-14L21 20M13.6 15h5.8"/>',
+  eye:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h10M7 13h6M7 17h8"/>'
+};
+const svg = (n, w) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (w || 2) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ic[n] + '</svg>';
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+
+/* ---------- 시간 ---------- */
+const hm = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
+const norm = t => typeof t === "string" ? { t, no:null } : t;
+const wrap = m => ((m % 1440) + 1440) % 1440;
+const ampm = m => wrap(m) < 720 ? "오전" : "오후";
+const hhmm = m => { m = Math.round(wrap(m)) % 1440; const h = Math.floor(m / 60), mm = m % 60; return (h % 12 === 0 ? 12 : h % 12) + ":" + String(mm).padStart(2, "0"); };
+const tl = m => (m >= 1440 ? "내일 " : "") + ampm(m) + " " + hhmm(m);
+const korT = m => { m = Math.round(wrap(m)) % 1440; const h = Math.floor(m / 60), mm = m % 60; return ampm(m) + " " + (h % 12 === 0 ? 12 : h % 12) + "시" + (mm ? " " + mm + "분" : ""); };
+const midnight = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); };
+const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
+const msToMin = ms => (ms - midnight()) / 60000;
+function fmtLeft(ms, mode){
+  if (ms <= 0) return mode === "ring" ? '<span class="w">곧 와요</span>' : "곧 도착";
+  const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = String(s % 60).padStart(2, "0");
+  if (mode === "ring") return h > 0
+    ? '<span class="n">' + h + '</span><span class="u">시간</span><span class="n">' + m + '</span><span class="u">분</span>'
+    : '<span class="n">' + m + '</span><span class="u">분</span><span class="n">' + ss + '</span><span class="u">초</span>';
+  return h > 0 ? h + "시간 " + m + "분 뒤" : m + "분 " + ss + "초 뒤";
+}
+const cd = (ms, mode) => '<span data-cd="' + ms + '" data-fmt="' + (mode || "short") + '">' + fmtLeft(ms - Date.now(), mode) + '</span>';
+
+/* ---------- 시간표 계산 ---------- */
+const homeIdx = r => r.seq.findIndex(s => s[0] === "home");
+function runsAt(r, idx, count){
+  const now = Date.now(), m0 = midnight(), off = r.seq[idx][1], out = [];
+  for (let day = 0; day <= 1; day++) for (const x of r.times.map(norm)){
+    const homeMin = day * 1440 + hm(x.t), depMin = homeMin + off, depMs = m0 + depMin * 60000;
+    if (depMs >= now - 30000) out.push({ r, idx, stop:r.seq[idx][0], homeMin, depMin, depMs, no:x.no || r.no, exact: off === 0 || (idx === 0 && !!r.startExact) });
+  }
+  return out.sort((a, b) => a.depMs - b.depMs).slice(0, count || 4);
+}
+function dist(a, b, c, d){
+  const Rm = 6371000, rad = x => x * Math.PI / 180, dl = rad(c - a), dn = rad(d - b);
+  const q = Math.sin(dl / 2) ** 2 + Math.cos(rad(a)) * Math.cos(rad(c)) * Math.sin(dn / 2) ** 2;
+  return 2 * Rm * Math.asin(Math.sqrt(q));
+}
+const walkMinOf = m => Math.ceil(m / 55) + 1;
+const fmtDist = m => m < 1000 ? Math.round(m / 10) * 10 + "m" : (m / 1000).toFixed(1) + "km";
+function homeOptions(pos){
+  const now = Date.now(), out = [];
+  for (const r of ROUTES){
+    const hi = homeIdx(r); if (hi <= 0) continue;
+    let best = null;
+    for (let i = 0; i < hi; i++){ const st = STOPS[r.seq[i][0]], d = dist(pos.lat, pos.lng, st.lat, st.lng); if (!best || d < best.d) best = { i, d }; }
+    const walk = walkMinOf(best.d), runs = runsAt(r, best.i, 6);
+    const ok = runs.filter(x => x.depMs - now >= (walk - 1) * 60000);
+    const ride = -r.seq[best.i][1], fast = ride <= 8 && r.id !== "r111e";
+    out.push({ r, idx:best.i, stop:r.seq[best.i][0], d:best.d, walk, runs: ok.length ? ok : runs, ride,
+      label: fast ? "바로 가는 버스" : r.homeLabel, k: fast ? "fast" : (r.id === "r111e" ? "sea" : "slow") });
+  }
+  const minD = Math.min(...out.map(o => o.d));
+  const arr = o => o.runs[0] ? o.runs[0].homeMin : 1e9;
+  return out.filter(o => o.d <= 800 || o.d === minD)
+    .sort((a, b) => Math.abs(a.d - b.d) <= 150 ? (arr(a) - arr(b)) || a.d - b.d : a.d - b.d);
+}
+function status(leftMin, walk){
+  if (leftMin <= 0) return { k:"late", t:"버스 올 시간이에요" };
+  if (leftMin < walk) return { k:"late", t:"빠듯해요 · 다음 버스도 있어요" };
+  if (leftMin <= walk + 5) return { k:"late", t:"지금 바로 나가세요" };
+  if (leftMin <= walk + 15) return { k:"warn", t:"슬슬 준비하세요" };
+  return { k:"ok", t:"여유 있어요" };
+}
+
+/* ===================== 실시간 버스 (국토교통부 TAGO) =====================
+   설정에서 공공데이터포털 서비스키를 넣으면 켜져요. 없거나 실패하면 시간표로 안내해요. */
+const LIVE = { on:false, city:null, map:{}, arr:{}, bus:{}, err:"", busy:false, lastOk:0, failAt:0, t:0 };
+const fresh = x => !!x && Date.now() - x.at < 120000;
+const LIVE_ROUTES = [["r230","230"],["r2301","230-1"],["r111e","111"],["r111s","111"]];
+function liveLog(t){ S.liveLog.push(new Date().toLocaleTimeString("ko-KR") + "  " + t); if (S.liveLog.length > 60) S.liveLog.shift(); }
+async function tago(svc, op, params){
+  const qs = new URLSearchParams(Object.assign({ _type:"json", numOfRows:"500", pageNo:"1" }, params));
+  let url;
+  if (SET.proxy) url = SET.proxy.replace(/\/$/, "") + "/" + svc + "/" + op + "?" + qs;
+  else {
+    const k = tagoKey().trim();
+    url = "https://apis.data.go.kr/1613000/" + svc + "/" + op + "?serviceKey=" + (k.includes("%") ? k : encodeURIComponent(k)) + "&" + qs;
+  }
+  const res = await fetch(url);
+  const text = await res.text();
+  let j;
+  try { j = JSON.parse(text); } catch (e) {
+    const m = text.match(/<returnAuthMsg>([^<]+)|<resultMsg>([^<]+)|<errMsg>([^<]+)/);
+    throw new Error(m ? (m[1] || m[2] || m[3]) : "응답 형식 오류 (HTTP " + res.status + ")");
+  }
+  const h = j.response && j.response.header;
+  if (h && h.resultCode && h.resultCode !== "00") throw new Error(h.resultMsg || ("오류 " + h.resultCode));
+  let items = j.response && j.response.body && j.response.body.items;
+  items = items && items.item;
+  return items ? (Array.isArray(items) ? items : [items]) : [];
+}
+function nearestIn(list, lat, lng){
+  let best = null;
+  list.forEach((s, i) => { const d = dist(lat, lng, +s.gpslati, +s.gpslong); if (!best || d < best.d) best = { s, i, d }; });
+  return best;
+}
+async function liveInit(force){
+  if (PREVIEW || (!tagoKey() && !SET.proxy)){ LIVE.on = false; return false; }
+  const cache = store.get("busapp.live", null);
+  if (!force && cache && cache.v === 1 && Date.now() - cache.at < 7 * 864e5 && cache.city){
+    LIVE.city = cache.city; LIVE.map = cache.map; LIVE.on = Object.keys(LIVE.map).length > 0; return LIVE.on;
+  }
+  LIVE.busy = true; LIVE.err = "";
+  try {
+    liveLog("도시코드 조회…");
+    const cities = await tago("BusSttnInfoInqireService", "getCtyCodeList", { numOfRows:"300" });
+    const c = cities.find(x => String(x.cityname || "").includes("사천"));
+    if (!c) throw new Error("TAGO 도시 목록에 사천시가 없어요 (도시 " + cities.length + "곳)");
+    LIVE.city = String(c.citycode); liveLog("사천시 도시코드 " + LIVE.city);
+    const stopsCache = {}, map = {};
+    const H = STOPS.home, SP = STOPS.samcheonpo;
+    for (const [rid, no] of LIVE_ROUTES){
+      const cands = (await tago("BusRouteInfoInqireService", "getRouteNoList", { cityCode:LIVE.city, routeNo:no })).filter(x => String(x.routeno).trim() === no);
+      liveLog(no + "번 노선 " + cands.length + "개 찾음");
+      for (const cnd of cands){
+        const id = cnd.routeid;
+        if (!stopsCache[id]){
+          stopsCache[id] = (await tago("BusRouteInfoInqireService", "getRouteAcctoThrghSttnList", { cityCode:LIVE.city, routeId:id }))
+            .map(s => ({ nodeid:s.nodeid, nodenm:s.nodenm, nodeord:+s.nodeord, gpslati:+s.gpslati, gpslong:+s.gpslong })).sort((a, b) => a.nodeord - b.nodeord);
+        }
+        const st = stopsCache[id];
+        const homes = st.map((s, i) => ({ s, i, d:dist(H.lat, H.lng, s.gpslati, s.gpslong) })).filter(x => x.d < 450).sort((a, b) => a.d - b.d);
+        if (!homes.length) continue;
+        const sp = st.map((s, i) => ({ i, d:dist(SP.lat, SP.lng, s.gpslati, s.gpslong) })).filter(x => x.d < 1500);
+        let home = homes[0];
+        if (rid === "r111s"){ home = homes.find(h => sp.some(x => x.i > h.i)); if (!home) continue; }
+        if (rid === "r111e"){ home = homes.find(h => sp.some(x => x.i < h.i)); if (!home) continue; }
+        if ((rid === "r230" || rid === "r2301") && home.i < 2) continue;
+        map[rid] = { routeid:id, no, stops:st, homeI:home.i, end: rid === "r111s" ? sp.find(x => x.i > home.i).i : st.length - 1 };
+        liveLog(no + "번(" + rid + ") 연결 · 집 앞 = " + st[home.i].nodenm + " (" + Math.round(home.d) + "m)");
+        break;
+      }
+    }
+    LIVE.map = map; LIVE.on = Object.keys(map).length > 0;
+    if (!LIVE.on) throw new Error("노선은 받았지만 집 앞 정류장과 맞는 노선을 못 찾았어요");
+    store.set("busapp.live", { v:1, at:Date.now(), city:LIVE.city, map });
+    return true;
+  } catch (e) {
+    LIVE.on = false; LIVE.err = e.message || String(e); liveLog("실패: " + LIVE.err); return false;
+  } finally { LIVE.busy = false; }
+}
+function liveNode(rid, pos){
+  const L = LIVE.on && LIVE.map[rid]; if (!L) return null;
+  if (!pos) return { L, i:L.homeI, s:L.stops[L.homeI] };
+  const b = nearestIn(L.stops.slice(0, L.homeI), pos.lat, pos.lng); if (!b) return null;
+  return { L, i:b.i, s:b.s, d:b.d };
+}
+function liveArrival(rid, node){
+  if (!node) return null;
+  if (NEED) NEED.nodes.add(node.s.nodeid);
+  const a = LIVE.arr[node.s.nodeid]; if (!fresh(a)) return null;
+  const it = a.list.filter(x => String(x.routeid) === String(node.L.routeid)).sort((x, y) => +x.arrtime - +y.arrtime)[0];
+  if (!it) return { none:true, at:a.at };
+  return { etaMs: a.at + (+it.arrtime) * 1000, prev:+it.arrprevstationcnt, at:a.at };
+}
+function liveBuses(rid){
+  const L = LIVE.on && LIVE.map[rid]; if (!L) return null;
+  if (NEED) NEED.routes.add(L.routeid);
+  return fresh(LIVE.bus[L.routeid]) ? LIVE.bus[L.routeid] : null;
+}
+async function liveRefresh(){
+  if (!LIVE.on || LIVE.busy || document.hidden || !NEED) return;
+  const nodes = [...NEED.nodes], routes = [...NEED.routes];
+  if (!nodes.length && !routes.length) return;
+  LIVE.busy = true;
+  try {
+    await Promise.all(nodes.map(async n => {
+      const list = await tago("ArvlInfoInqireService", "getSttnAcctoArvlPrearngeInfoList", { cityCode:LIVE.city, nodeId:n, numOfRows:"50" });
+      LIVE.arr[n] = { at:Date.now(), list };
+    }).concat(routes.map(async id => {
+      const list = await tago("BusLcInfoInqireService", "getRouteAcctoBusLcList", { cityCode:LIVE.city, routeId:id, numOfRows:"50" });
+      LIVE.bus[id] = { at:Date.now(), list:list.map(x => ({ nodeord:+x.nodeord, nodenm:x.nodenm, vehicleno:x.vehicleno })) };
+    })));
+    LIVE.lastOk = Date.now(); LIVE.err = "";
+  } catch (e) { LIVE.err = e.message || String(e); LIVE.failAt = Date.now(); liveLog("갱신 실패: " + LIVE.err); }
+  LIVE.busy = false;
+  render();
+}
+
+/* ---------- 소리 · 진동 ---------- */
+let actx = null, voiceList = [];
+const TTS = () => plug("TextToSpeech");
+async function loadVoices(){
+  try {
+    if (NATIVE && TTS()){ const r = await TTS().getSupportedVoices(); voiceList = (r.voices || []).map((v, i) => ({ i, name:v.name || v.voiceURI, lang:v.lang })).filter(v => /^ko/i.test(v.lang)); return; }
+    if ("speechSynthesis" in window) voiceList = speechSynthesis.getVoices().filter(v => /^ko/i.test(v.lang)).map(v => ({ name:v.name, lang:v.lang, local:v.localService }));
+  } catch (e) {}
+}
+if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => { loadVoices(); if (S.view === "settings") render(); };
+function webVoice(){
+  const vs = speechSynthesis.getVoices().filter(v => /^ko/i.test(v.lang));
+  if (SET.voice){ const v = vs.find(v => v.name === SET.voice); if (v) return v; }
+  const rank = v => (/(natural|neural|premium|enhanced|online|wavenet)/i.test(v.name) ? 5 : 0) + (/google|samsung/i.test(v.name) ? 3 : 0) + (v.localService ? 0 : 1);
+  return vs.sort((a, b) => rank(b) - rank(a))[0];
+}
+const canSpeak = NATIVE || "speechSynthesis" in window;
+function deviceSpeak(t){
+  try {
+    if (NATIVE && TTS()){
+      const o = { text:t, lang:"ko-KR", rate:SET.rate, pitch:1, volume:1, category:"playback" };
+      const v = voiceList.find(v => v.name === SET.voice); if (v) o.voice = v.i;
+      TTS().stop().catch(() => {}).then(() => TTS().speak(o)).catch(() => {});
+      return;
+    }
+    const s = window.speechSynthesis; if (!s) return;
+    s.cancel();
+    const u = new SpeechSynthesisUtterance(t); u.lang = "ko-KR"; u.rate = SET.rate; u.pitch = 1;
+    const v = webVoice(); if (v) u.voice = v;
+    s.speak(u);
+  } catch (e) {}
+}
+/* 구글 AI 목소리: 한 번 만든 문장은 폰에 저장해 두고 다시 써요 (요금·속도 절약) */
+const aiReady = () => SET.tts === "google" && !!gKey() && !PREVIEW;
+const ttsCache = new Map(Object.entries(store.get("busapp.tts", {})));
+let curAudio = null, aiErr = "";
+function saveTts(){
+  const o = {}; let size = 0;
+  for (const [k, v] of [...ttsCache].reverse()){ size += v.length; if (size > 2500000) break; o[k] = v; }
+  store.set("busapp.tts", o);
+}
+async function aiAudio(t){
+  const k = SET.gVoice + "|" + SET.rate + "|" + t;
+  if (ttsCache.has(k)){ const v = ttsCache.get(k); ttsCache.delete(k); ttsCache.set(k, v); return v; }
+  const res = await fetch("https://texttospeech.googleapis.com/v1/text:synthesize?key=" + encodeURIComponent(gKey().trim()), {
+    method:"POST", headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ input:{ text:t }, voice:{ languageCode:"ko-KR", name:SET.gVoice }, audioConfig:{ audioEncoding:"MP3", speakingRate:SET.rate } }) });
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok || !j.audioContent) throw new Error((j.error && j.error.message) || ("HTTP " + res.status));
+  ttsCache.set(k, j.audioContent);
+  while (ttsCache.size > 80) ttsCache.delete(ttsCache.keys().next().value);
+  saveTts();
+  return j.audioContent;
+}
+async function aiSpeak(t){
+  try {
+    const b64 = await aiAudio(t);
+    stopSpeak();
+    curAudio = new Audio("data:audio/mpeg;base64," + b64);
+    await curAudio.play();
+    aiErr = ""; return true;
+  } catch (e) { aiErr = e.message || String(e); return false; }
+}
+function speak(t, force){
+  if (!t || (!force && (SET.sound === "off" || SET.sound === "chime"))) return;
+  if (aiReady()){ aiSpeak(t).then(ok => { if (!ok){ deviceSpeak(t); if (S.view === "settings") render(); } }); return; }
+  deviceSpeak(t);
+}
+const prefetch = list => { if (aiReady()) list.forEach(t => aiAudio(t).catch(() => {})); };
+function stopSpeak(){
+  try { if (curAudio){ curAudio.pause(); curAudio = null; } } catch (e) {}
+  try { if (NATIVE && TTS()) TTS().stop().catch(() => {}); else if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
+}
+function chime(force){
+  if (!force && (SET.sound === "off" || SET.sound === "voice")) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const t = actx.currentTime;
+    [[659.3, 0], [880, .16], [1318.5, .32]].forEach(([f, d]) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = "sine"; o.frequency.value = f;
+      g.gain.setValueAtTime(.0001, t + d); g.gain.exponentialRampToValueAtTime(.3, t + d + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d + .7);
+      o.connect(g); g.connect(actx.destination); o.start(t + d); o.stop(t + d + .75);
+    });
+  } catch (e) {}
+}
+function buzz(){ try { const H = plug("Haptics"); if (H){ H.vibrate({ duration:600 }).catch(() => {}); return; } if (navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 400]); } catch (e) {} }
+
+/* ---------- 알림 ---------- */
+function toast(title, sub){
+  const el = document.getElementById("toast");
+  el.innerHTML = '<div class="toast-in" data-act="toastclose">' + svg("bell", 2.2) + '<div><b>' + esc(title) + '</b>' + (sub ? '<span>' + esc(sub) + '</span>' : '') + '</div></div>';
+  el.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 8000);
+}
+const LN = () => plug("LocalNotifications");
+let chanReady = false;
+async function nativePrep(){
+  const ln = LN(); if (!ln) return;
+  try { const p = await ln.checkPermissions(); if (p.display !== "granted") await ln.requestPermissions(); } catch (e) {}
+  if (!chanReady){ try { await ln.createChannel({ id:"bus-alert", name:"버스 도착 알림", description:"버스 오기 전에 알려드려요", importance:5, visibility:1, vibration:true }); chanReady = true; } catch (e) {} }
+}
+const nidOf = key => { let h = 0; for (const c of key) h = (h * 31 + c.charCodeAt(0)) | 0; return (Math.abs(h) % 200000) * 10 + 100; };
+async function scheduleNative(a){
+  const ln = LN(); if (!ln || !a) return;
+  await nativePrep();
+  const list = ALERTS.map((m, i) => ({ id:a.nid + i, title:a.no + "번 버스가 " + m + "분 뒤에 와요", body:a.stop + " 정류장 · " + (m <= 5 ? "지금 정류장으로 가세요" : "미리 준비하세요"), channelId:"bus-alert",
+    schedule:{ at:new Date(a.ms - m * 60000), allowWhileIdle:true } })).filter(n => n.schedule.at.getTime() > Date.now() + 3000);
+  try { await ln.cancel({ notifications:ALERTS.map((m, i) => ({ id:a.nid + i })) }); } catch (e) {}
+  if (list.length){ try { await ln.schedule({ notifications:list }); } catch (e) { toast("폰 알림 예약 실패", String(e.message || e)); } }
+}
+async function cancelNative(a){ const ln = LN(); if (!ln || !a) return; try { await ln.cancel({ notifications:ALERTS.map((m, i) => ({ id:a.nid + i })) }); } catch (e) {} }
+async function sysNotify(title, body){
+  if (NATIVE) return;
+  try {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+    const opt = { body, icon:"icon-192.png", badge:"icon-192.png", tag:"bus-alert", renotify:true, vibrate:[300, 150, 300] };
+    if (reg) reg.showNotification(title, opt); else new Notification(title, opt);
+  } catch (e) {}
+}
+async function wakeOn(){ if (NATIVE) return; try { if ("wakeLock" in navigator && !wake){ wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => { wake = null; }); } } catch (e) {} }
+function wakeOff(){ try { if (wake) wake.release(); } catch (e) {} wake = null; }
+function saveAlarm(){ store.set("busapp.alarm", S.alarm ? Object.assign({}, S.alarm, { fired:[...S.alarm.fired] }) : null); }
+function setAlarm(d){
+  const ms = +d.ms, left = ms - Date.now();
+  S.alarm = { key:d.key, ms, no:d.no, stop:d.stop, fired:new Set(ALERTS.filter(m => left <= m * 60000)), nid:nidOf(d.key) };
+  const pend = ALERTS.filter(m => !S.alarm.fired.has(m));
+  if (!NATIVE){ try { if ("Notification" in window && Notification.permission === "default"){ const p = Notification.requestPermission(); if (p && p.catch) p.catch(() => {}); } } catch (e) {} }
+  scheduleNative(S.alarm); wakeOn(); saveAlarm();
+  prefetch(pend.map(m => d.no + "번 버스가 " + m + "분 뒤에 와요. " + d.stop + " 정류장이에요."));
+  toast("알림을 켰어요", pend.length ? pend.join("·") + "분 전에 알려드려요" : "곧 버스가 와요");
+  chime(); speak("알림을 켰어요. " + d.no + "번 버스 오기 전에 알려드릴게요.");
+}
+function clearAlarm(msg){ cancelNative(S.alarm); S.alarm = null; wakeOff(); saveAlarm(); if (msg) toast(msg); }
+function toggleAlarm(d){
+  if (S.alarm && S.alarm.key === d.key){ clearAlarm("알림을 껐어요"); render(); return; }
+  if (S.alarm) cancelNative(S.alarm);
+  setAlarm(d); render();
+}
+function alarmEta(key, ms){
+  const a = S.alarm; if (!a || a.key !== key || Math.abs(a.ms - ms) < 45000) return;
+  a.ms = ms; saveAlarm(); scheduleNative(a);
+}
+function checkAlarm(){
+  const a = S.alarm; if (!a) return;
+  const left = a.ms - Date.now();
+  if (left < -90000){ clearAlarm("버스 시간이 지나서 알림을 껐어요"); render(); return; }
+  const crossed = ALERTS.filter(m => !a.fired.has(m) && left <= m * 60000);
+  if (!crossed.length) return;
+  crossed.forEach(m => a.fired.add(m)); saveAlarm();
+  const m = Math.min(...crossed), title = a.no + "번 버스가 " + m + "분 뒤에 와요";
+  toast(title, a.stop + " 정류장"); buzz(); chime();
+  setTimeout(() => speak(title + ". " + a.stop + " 정류장이에요."), SET.sound === "both" ? 900 : 0);
+  sysNotify(title, a.stop + " 정류장 · " + (m <= 5 ? "지금 정류장으로 가세요" : "미리 준비하세요"));
+}
+function alarmBar(){
+  const el = document.getElementById("abar"), a = S.alarm;
+  document.body.classList.toggle("alarming", !!a);
+  if (!a){ el.hidden = true; el.innerHTML = ""; return; }
+  el.hidden = false;
+  el.innerHTML = svg("bell", 2.2) + '<div class="t">' + esc(a.no) + '번 · ' + esc(a.stop) + ' 알림 중' + cd(a.ms, "short") + '</div><button data-act="alarmoff">끄기</button>';
+}
+
+/* ---------- 공통 조각 ---------- */
+const kindTag = (t, k) => '<span class="kind k-' + k + '">' + esc(t) + '</span>';
+const header = (title, sub) => '<header class="bar"><button class="iconbtn" data-act="back" aria-label="뒤로">' + svg("back", 2.4) + '</button><div><h1>' + title + '</h1>' + (sub ? '<p>' + sub + '</p>' : '') + '</div></header>';
+const easy = () => SET.mode !== "normal";
+function busCard(o){
+  const run = o.run, now = Date.now(), live = o.live && o.live.etaMs ? o.live : null;
+  const target = live ? live.etaMs : run.depMs;
+  const left = target - now, leftMin = Math.floor(left / 60000);
+  const tmr = !live && run.depMin >= 1440 && leftMin > 120;
+  const st = tmr ? { k:"done", t:"오늘 버스는 끝났어요" } : status(leftMin, o.walk);
+  const C = 2 * Math.PI * 95, frac = Math.min(Math.max(left, 0), 3600000) / 3600000;
+  const col = st.k === "ok" ? "url(#rg)" : st.k === "warn" ? "var(--warn)" : st.k === "late" ? "var(--late)" : "var(--blue-line)";
+  const key = run.r.id + "|" + run.stop + "|" + run.depMs, on = S.alarm && S.alarm.key === key;
+  if (on && live) alarmEta(key, target);
+  const stopName = o.stopName || STOPS[run.stop].name;
+  const srcTag = live ? kindTag("실시간 · " + (live.prev > 0 ? live.prev + "정거장 전" : "곧 도착"), "live")
+    : (LIVE.on ? kindTag(o.live && o.live.none ? "다가오는 버스 없음 · 시간표" : "시간표 기준", "tt") : "");
+  const depTxt = live ? '<span>' + ampm(msToMin(target)) + ' <span class="num">' + hhmm(msToMin(target)) + '</span></span><small>실시간 도착 예정</small>'
+    : '<span>' + (run.exact ? '' : '약 ') + (run.depMin >= 1440 ? '내일 ' : '') + ampm(run.depMin) + ' <span class="num">' + hhmm(run.depMin) + '</span></span>' + (run.exact ? '' : '<small>예상 시간 · 미리 나가 계세요</small>');
+  const h = '<section class="card main"><div class="main-top"><div class="ring"><svg viewBox="0 0 224 224"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#56ADFF"/><stop offset="1" stop-color="#2F62F5"/></linearGradient></defs>' +
+    '<circle class="trk" cx="112" cy="112" r="95" fill="none" stroke-width="16"/>' +
+    '<circle class="val" data-ring="' + target + '" cx="112" cy="112" r="95" fill="none" stroke="' + col + '" stroke-width="16" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - frac)).toFixed(1) + '"/></svg>' +
+    '<div class="ring-in"><div class="ring-big">' + cd(target, "ring") + '</div><div class="ring-sm">' + (tmr ? '내일 첫차까지' : '남았어요') + '</div></div></div>' +
+    '<div class="info"><span class="st s-' + st.k + '">' + st.t + '</span>' + (srcTag ? '<div class="srcwrap">' + srcTag + '</div>' : '') +
+    '<dl class="facts"><dt>타는 곳</dt><dd>' + esc(stopName) + (o.where ? '<small>' + o.where + '</small>' : '') + '</dd>' +
+    '<dt>버스</dt><dd><span class="pk"><span class="plate' + (easy() ? '' : ' sm') + '">' + esc(run.no) + '<small>번</small></span>' + kindTag(o.label, o.k) + '</span></dd>' +
+    '<dt>' + (live ? '도착' : '출발') + '</dt><dd>' + depTxt + '</dd>' +
+    (o.arrive ? '<dt>내리는 곳</dt><dd>' + o.arrive + '</dd>' : '') + '</dl></div></div>' +
+    '<div class="btnrow">' + (canSpeak ? '<button class="btn" data-act="speak">' + svg("spk") + '소리로 듣기</button>' : '') +
+    '<button class="btn ' + (on ? 'btn--on' : 'btn--pri') + '" data-act="alarm" data-key="' + esc(key) + '" data-ms="' + target + '" data-no="' + esc(run.no) + '" data-stop="' + esc(stopName) + '"' + (canSpeak ? '' : ' style="grid-column:1/-1"') + '>' + svg(on ? "bellOff" : "bell") + (on ? '알림 끄기' : '알림 받기') + '</button></div>' +
+    '<p class="alnote">' + (on ? '30·25·20·15·10·5·3분 전에 알려드려요' + (NATIVE ? ' · 앱을 꺼도 와요' : '') : '버스 오기 30분 전부터 소리와 진동으로 알려드려요') + '</p></section>';
+  let sp = (o.title ? o.title + ". " : "") + stopName + " 정류장에서 " + run.no + "번 버스를 타세요. " + o.label + "예요. ";
+  if (tmr) sp += "오늘 버스는 끝났어요. 내일 " + korT(run.depMin) + " 버스예요.";
+  else sp += (live ? "실시간으로 " : korT(run.depMin) + " 버스예요. ") + (leftMin <= 0 ? "지금 올 시간이에요." : (leftMin >= 60 ? Math.floor(leftMin / 60) + "시간 " : "") + (leftMin % 60) + "분 남았어요.");
+  S.speech = sp;
+  return h;
+}
+/* 노선도 — 시간표(예상 위치) 또는 실시간 정류장 목록·버스 위치 */
+function routeBlock(o){
+  const r = R(o.rid), lv = LIVE.on && LIVE.map[o.rid] && o.liveFrom != null ? LIVE.map[o.rid] : null;
+  let items, from, to, busIdx = [], busBetween = -1, busNote = "";
+  if (lv){
+    items = lv.stops.map((s, i) => ({ name:s.nodenm, i }));
+    from = o.liveFrom; to = o.liveTo;
+    const b = liveBuses(o.rid);
+    if (b && b.list.length){
+      b.list.forEach(x => { const k = lv.stops.findIndex(s => s.nodeord === x.nodeord); if (k >= 0) busIdx.push(k); });
+      const ahead = busIdx.filter(k => k <= from).sort((a, c) => c - a)[0];
+      busNote = ahead != null ? "버스가 " + lv.stops[ahead].nodenm + "에 있어요 · " + (from - ahead === 0 ? "곧 도착" : (from - ahead) + "정거장 전") + " (실시간)" : "타는 정류장 쪽으로 오는 버스가 아직 없어요";
+    } else busNote = b ? "지금 운행 중인 버스가 없어요" : "버스 위치를 불러오는 중이에요";
+  } else {
+    items = r.seq.map((s, i) => ({ name:STOPS[s[0]].name, i, t:o.homeMin + s[1] }));
+    from = o.fromI; to = o.toI;
+    const now = msToMin(Date.now()), first = items[0].t, last = items[items.length - 1].t;
+    if (now < first - 0.5) busNote = "버스 출발 전 · " + items[0].name + "에서 " + tl(first) + " 출발 예정";
+    else if (now > last + 0.5) busNote = "이 버스는 운행을 마쳤어요";
+    else {
+      for (let k = 0; k < items.length - 1; k++) if (now >= items[k].t && now < items[k + 1].t){ busBetween = k; break; }
+      if (busBetween >= 0) busNote = "버스가 " + items[busBetween].name + " → " + items[busBetween + 1].name + " 사이쯤 있어요 (예상)";
+    }
+  }
+  const full = S.tlOpen, inSeg = k => k >= from && k <= to;
+  let show = full ? items.map(x => x.i) : items.filter(x => inSeg(x.i)).map(x => x.i);
+  let gap = null;
+  if (!full && show.length > 7){ gap = { n:show.length - 6, at:3, hidden:show.slice(3, -3) }; show = show.slice(0, 3).concat(show.slice(-3)); }
+  const busHere = k => busIdx.includes(k);
+  let h = '<section class="card"><div class="card-h"><h2>' + (o.title || '가는 길') + '</h2><button class="lnk" data-act="tl">' + (full ? '접기' : '전체 노선 보기') + '</button></div>' +
+    (busNote ? '<div class="buspos">' + svg("bus") + '<span>' + esc(busNote) + '</span></div>' : '') + '<ol class="tl' + (full ? ' full' : '') + '">';
+  show.forEach((k, n) => {
+    if (gap && n === gap.at){
+      const hasBus = gap.hidden.some(i => busHere(i) || i === busBetween);
+      h += '<li class="gap"><span class="dot"></span><button data-act="tl">' + (hasBus ? '버스 있음 · ' : '') + '정류장 ' + gap.n + '곳 더보기</button></li>';
+    }
+    const x = items[k], first = k === from, last = k === to, out = full && !inSeg(k);
+    const tm = lv ? (first ? (o.firstTxt || '') : last ? (o.lastTxt || '') : '') : (first ? tl(x.t) + ' 출발' : '약 ' + tl(x.t) + (last ? ' 도착' : ''));
+    h += '<li class="' + (first ? 'on' : last ? 'end' : '') + (out ? ' out' : '') + '" style="animation-delay:' + Math.min(n * 18, 400) + 'ms">' +
+      (busHere(k) ? '<span class="busic">' + svg("bus", 2.2) + '</span>' : '<span class="dot"></span>') +
+      '<div class="nm">' + esc(x.name) + (first ? ' <span class="kind k-sea">타는 곳</span>' : '') + (last ? ' <span class="kind k-fast">내리는 곳</span>' : '') + '</div>' +
+      (tm ? '<div class="tm">' + tm + '</div>' : '') + '</li>';
+    if (k === busBetween && (full || (inSeg(k) && inSeg(k + 1) && show.includes(k + 1)))){
+      h += '<li class="bus"><span class="busic">' + svg("bus", 2.2) + '</span><div class="nm">버스가 지금 여기쯤 와요 (예상)</div></li>';
+    }
+  });
+  return h + '</ol></section>';
+}
+
+/* ---------- 화면: 홈 ---------- */
+function nextFromHome(id){
+  const r = R(id), run = runsAt(r, homeIdx(r), 1)[0]; if (!run) return null;
+  const lv = liveArrival(id, liveNode(id));
+  const live = lv && lv.etaMs ? lv : null;
+  return { run, live, ms: live ? live.etaMs : run.depMs };
+}
+function viewMain(){
+  const d = new Date(), now = nowMin(), hr = d.getHours();
+  const hello = hr >= 5 && hr < 11 ? "좋은 아침이에요" : hr >= 11 && hr < 17 ? "좋은 오후예요" : hr >= 17 && hr < 21 ? "좋은 저녁이에요" : "편안한 밤 보내세요";
+  let o = '<header class="top"><div><p class="hello">' + hello + '</p><p class="today">' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + WEEK[d.getDay()] + '요일</p></div>' +
+    '<div class="clock">' + (LIVE.on ? '<span class="livedot" title="실시간"></span>' : '') + ampm(now) + ' <span class="num">' + hhmm(now) + '</span></div></header>';
+  const n230 = nextFromHome("r230"), n111 = nextFromHome("r111s");
+  if (easy()){
+    const tile = (v, cls, icn, t, s, n) => '<button class="tile' + cls + '" data-act="go" data-v="' + v + '"><span class="tile-ic">' + svg(icn) + '</span><span class="tile-t">' + t + '</span><span class="tile-s">' + s + '</span><span class="tile-n">' + n + '</span></button>';
+    const nt = x => x ? (x.live ? '실시간 도착' : tl(x.run.depMin)) + '<em>' + cd(x.ms) + '</em>' : '시간표 없음';
+    o += '<h2 class="sec">어디 가세요?</h2><div class="grid">' +
+      tile("eup", " tile--hi", "bus", "읍 가는 버스", "230번 바로 나가요", nt(n230)) +
+      tile("sam", "", "sea", "삼천포 가는 버스", "111번 바로 가요", nt(n111)) +
+      tile("gohome", "", "home", "집 가는 버스", "가까운 정류장 찾기", "내 위치로 찾기") +
+      tile("times", "", "cal", "전체 시간표", "노선별로 보기", "시간 모두 보기") + '</div>';
+  } else {
+    const qa = (v, cls, icn, t, s) => '<button class="qa' + cls + '" data-act="go" data-v="' + v + '"><span class="ic">' + svg(icn) + '</span><b>' + t + '</b><span>' + s + '</span></button>';
+    o += '<div class="qas">' + qa("eup", " qa--hi", "bus", "읍 가는 버스", n230 ? cd(n230.ms) : "-") + qa("sam", "", "sea", "삼천포 가는 버스", n111 ? cd(n111.ms) : "-") + qa("gohome", "", "home", "집 가는 버스", "가까운 정류장") + '</div>';
+  }
+  o += '<section class="card"><div class="card-h"><h2>' + (easy() ? '집 앞에서 곧 출발' : '집 앞 정류장') + '</h2><span>' + STOPS.home.name + (LIVE.on ? ' · 실시간' : '') + '</span></div><ul class="deps">';
+  if (easy()){
+    const list = ROUTES.flatMap(r => runsAt(r, homeIdx(r), 2)).sort((a, b) => a.depMs - b.depMs).slice(0, 5);
+    for (const x of list){
+      o += '<li><button class="row" data-act="go" data-v="' + (x.r.id === "r111s" ? "sam" : "eup") + '" data-sel="' + x.r.id + '">' +
+        '<span class="dt num"><small>' + (x.depMin >= 1440 ? "내일 " : "") + ampm(x.depMin) + '</small>' + hhmm(x.depMin) + '</span>' +
+        '<span class="dmid"><span class="plate sm">' + esc(x.no) + '</span>' + kindTag(x.r.outShort, x.r.outK) + '</span>' +
+        '<span class="dl">' + cd(x.depMs) + '</span></button></li>';
+    }
+  } else {
+    for (const r of ROUTES){
+      const x = nextFromHome(r.id); if (!x) continue;
+      const after = runsAt(r, homeIdx(r), 2)[1];
+      o += '<li><button class="row rt" data-act="go" data-v="' + (r.id === "r111s" ? "sam" : "eup") + '" data-sel="' + r.id + '">' +
+        '<span><span class="nm"><span class="plate sm">' + esc(x.run.no) + '</span>' + kindTag(r.out, r.outK) + (x.live ? kindTag("실시간", "live") : '') + '</span>' +
+        '<span class="sub">' + esc(r.outNote) + '</span></span>' +
+        '<span class="dl">' + cd(x.ms) + '<small>' + (x.live ? '실시간' : tl(x.run.depMin)) + (after ? ' · 다음 ' + hhmm(after.depMin) : '') + '</small></span></button></li>';
+    }
+  }
+  o += '</ul></section>';
+  if (!easy()) o += '<button class="btn btn--ghost" data-act="go" data-v="times">' + svg("cal") + '전체 시간표 보기</button>';
+  return o;
+}
+
+/* ---------- 화면: 읍 · 삼천포 가는 버스 ---------- */
+function outView(rid, title, others){
+  const r = R(rid), hi = homeIdx(r), runs = runsAt(r, hi, 4), run = runs[0];
+  if (!run) return '<section class="card empty"><b>시간표가 없어요</b></section>';
+  let o = '';
+  const node = liveNode(rid), lv = liveArrival(rid, node);
+  const last = r.seq.length - 1, endKey = r.seq[last][0];
+  const arrive = last > hi ? '<span>' + STOPS[endKey].name + '</span><small>약 ' + tl(run.homeMin + r.seq[last][1]) + ' 도착</small>' : '<small>' + esc(r.outNote) + '</small>';
+  if (r.outK === "slow") o += '<div class="note"><b>돌아서 가는 버스예요.</b> ' + esc(r.outNote) + '. 빨리 가려면 230번을 타세요.</div>';
+  o += busCard({ run, live:lv, walk:SET.homeWalk, label:r.out, k:r.outK, title, where:"집 앞 정류장", arrive, stopName: node ? node.s.nodenm : null });
+  if (others.length){
+    o += '<section class="card"><div class="card-h"><h2>다른 버스</h2><span>눌러서 바꾸기</span></div><ul class="deps">';
+    for (const id of others){
+      const x = nextFromHome(id); if (!x) continue;
+      o += '<li><button class="row rt" data-act="eupsel" data-v="' + id + '"><span><span class="nm"><span class="plate sm">' + esc(x.run.no) + '</span>' + kindTag(R(id).out, R(id).outK) + '</span>' +
+        '<span class="sub">' + (x.live ? '실시간' : tl(x.run.depMin) + ' 출발') + ' · ' + esc(R(id).outNote) + '</span></span><span class="dl">' + cd(x.ms) + '</span></button></li>';
+    }
+    o += '</ul></section>';
+  }
+  if (last > hi){
+    const lvm = LIVE.on && LIVE.map[rid];
+    o += routeBlock({ rid, fromI:hi, toI:last, homeMin:run.homeMin, liveFrom: lvm ? lvm.homeI : null, liveTo: lvm ? lvm.end : null, title:"버스 타고 가는 길",
+      firstTxt: lv && lv.etaMs ? '실시간 ' + tl(msToMin(lv.etaMs)) + ' 도착' : tl(run.depMin) + ' 출발' });
+  } else o += '<section class="card"><div class="card-h"><h2>가는 길</h2></div><p class="hint">' + esc(r.outNote) + '. 사천까지 걸리는 시간은 시간표에 없어서 출발 시간만 알려드려요.</p></section>';
+  if (runs.length > 1){
+    o += '<section class="card"><div class="card-h"><h2>그 다음 ' + esc(r.no) + '번</h2><span>' + STOPS.home.name + '</span></div><ul class="deps">';
+    for (const x of runs.slice(1)) o += '<li><div class="row static"><span class="dt num"><small>' + (x.depMin >= 1440 ? "내일 " : "") + ampm(x.depMin) + '</small>' + hhmm(x.depMin) + '</span><span class="dmid"><span class="plate sm">' + esc(x.no) + '</span></span><span class="dl">' + cd(x.depMs) + '</span></div></li>';
+    o += '</ul></section>';
+  }
+  return o;
+}
+function viewEup(){
+  let o = header("읍 가는 버스", STOPS.home.name + "(집 앞)에서 타요");
+  o += '<div class="pills" role="group">' + EUP.map(id => { const r = R(id); return '<button class="pill" data-act="eupsel" data-v="' + id + '" aria-pressed="' + (S.eupSel === id) + '">' + r.no + '번<small>' + r.out + '</small></button>'; }).join("") + '</div>';
+  return o + outView(S.eupSel, "읍 가는 버스", EUP.filter(id => id !== S.eupSel));
+}
+function viewSam(){ return header("삼천포 가는 버스", STOPS.home.name + "(집 앞)에서 타요 · 아침 8시는 228번") + outView("r111s", "삼천포 가는 버스", []); }
+
+/* ---------- 화면: 집 가는 버스 ---------- */
+function pickCard(open){
+  const boards = [...new Set(ROUTES.flatMap(r => r.seq.slice(0, homeIdx(r)).map(s => s[0])))];
+  return '<details class="card pick"' + (open ? ' open' : '') + '><summary>지금 계신 곳 직접 고르기</summary>' +
+    '<div class="half">자주 가는 곳</div><div class="places">' + PLACES.map((p, i) => '<button class="place" data-act="place" data-v="' + i + '">' + esc(p.name) + '</button>').join("") + '</div>' +
+    '<div class="half">정류장</div><div class="places">' + boards.map(k => '<button class="place" data-act="stopplace" data-v="' + k + '">' + esc(STOPS[k].name) + '</button>').join("") + '</div></details>';
+}
+function routeUrl(p, name, lat, lng){
+  const dest = encodeURIComponent(name) + "," + lat + "," + lng;
+  if (p && p.src === "gps") return "https://map.kakao.com/link/by/walk/" + encodeURIComponent("내 위치") + "," + p.lat + "," + p.lng + "/" + dest;
+  return "https://map.kakao.com/link/to/" + dest;
+}
+function viewHome(){
+  let o = header("집 가는 버스", "가장 가까운 정류장을 찾아드려요");
+  if (S.locating) return o + '<section class="card loc"><div class="locating"><span class="pulse"></span>내 위치를 찾고 있어요…</div><p class="hint">처음엔 위치 사용을 허용해 주세요</p></section>';
+  if (!S.pos){
+    o += '<section class="card loc">' + (S.locErr ? '<div class="loc-lab">' + svg("pin") + '위치를 찾지 못했어요</div><p class="hint">' + esc(S.locErr === true ? '위치 권한을 켜거나 아래에서 지금 계신 곳을 골라주세요.' : S.locErr) + '</p>' : '<p class="hint">버튼을 누르면 지금 위치에서 가장 가까운 정류장과 집 가는 버스를 알려드려요.</p>') +
+      '<button class="btn btn--pri btn--big" data-act="locate" style="margin-top:8px">' + svg("pin") + '가장 가까운 정류장 조회</button></section>';
+    return o + pickCard(!!S.locErr);
+  }
+  const p = S.pos, homeD = dist(p.lat, p.lng, STOPS.home.lat, STOPS.home.lng);
+  const whereTxt = p.src === "gps" ? "내 위치 기준" : esc(p.name) + " 기준";
+  if (homeD < 300){
+    return o + '<section class="card loc"><div class="loc-lab">' + svg("pin") + whereTxt + '</div><div class="loc-name">집 앞이에요</div><div class="loc-meta">' + STOPS.home.name + '까지 약 ' + fmtDist(homeD) + '</div>' +
+      '<div class="loc-act"><button class="btn" data-act="locate">' + svg("re") + '다시 조회</button></div></section>' + pickCard(false);
+  }
+  const opts = homeOptions(p);
+  if (!opts.length) return o + '<section class="card empty"><b>집 가는 버스를 찾지 못했어요</b></section>' + pickCard(true);
+  const sel = opts.find(x => x.r.id === S.homeSel) || opts[0];
+  const ln = liveNode(sel.r.id, p), useLive = ln && ln.d < 1500;
+  const st = useLive ? { name:ln.s.nodenm, lat:ln.s.gpslati, lng:ln.s.gpslong, d:ln.d } : { name:STOPS[sel.stop].name, lat:STOPS[sel.stop].lat, lng:STOPS[sel.stop].lng, d:sel.d };
+  const walk = walkMinOf(st.d);
+  o += '<section class="card loc"><div class="loc-lab">' + svg("pin") + whereTxt + ' · 가장 가까운 정류장</div><div class="loc-name">' + esc(st.name) + '</div>' +
+    '<div class="loc-meta">여기서 약 ' + fmtDist(st.d) + ' · 걸어서 ' + walk + '분쯤</div>' +
+    '<div class="loc-act"><button class="btn btn--pri" data-act="route" data-url="' + esc(routeUrl(p, st.name + " 정류장", st.lat, st.lng)) + '">' + svg("walk") + '정류장 길찾기</button><button class="btn" data-act="locate">' + svg("re") + '다시 조회</button></div></section>';
+  if (opts.length > 1) o += '<div class="pills" role="group">' + opts.map(x => '<button class="pill" data-act="homesel" data-v="' + x.r.id + '" aria-pressed="' + (x === sel) + '">' + x.r.no + '번<small>' + x.label + '</small></button>').join("") + '</div>';
+  const run = sel.runs[0], lv = useLive ? liveArrival(sel.r.id, ln) : null;
+  if (run){
+    const arrMin = lv && lv.etaMs ? msToMin(lv.etaMs) + sel.ride : run.homeMin;
+    o += busCard({ run, live:lv, walk, label:sel.label, k:sel.k, title:"집 가는 버스", where:"걸어서 " + walk + "분", stopName:st.name,
+      arrive:'<span>' + STOPS.home.name + '</span><small>약 ' + tl(arrMin) + ' 도착 · 버스로 ' + sel.ride + '분</small>' });
+  }
+  const others = opts.filter(x => x !== sel);
+  if (others.length){
+    o += '<section class="card"><div class="card-h"><h2>다른 집 가는 버스</h2><span>눌러서 바꾸기</span></div><ul class="deps">';
+    for (const x of others){
+      const rr = x.runs[0]; if (!rr) continue;
+      const xl = liveNode(x.r.id, p), xok = xl && xl.d < 1500, xa = xok ? liveArrival(x.r.id, xl) : null, ms = xa && xa.etaMs ? xa.etaMs : rr.depMs;
+      o += '<li><button class="row rt" data-act="homesel" data-v="' + x.r.id + '"><span><span class="nm"><span class="plate sm">' + esc(rr.no) + '</span>' + kindTag(x.label, x.k) + (xa && xa.etaMs ? kindTag("실시간", "live") : '') + '</span>' +
+        '<span class="sub">' + esc(xok ? xl.s.nodenm : STOPS[x.stop].name) + ' ' + fmtDist(xok ? xl.d : x.d) + ' · 집 약 ' + tl(xa && xa.etaMs ? msToMin(xa.etaMs) + x.ride : rr.homeMin) + '</span></span><span class="dl">' + cd(ms) + '</span></button></li>';
+    }
+    o += '</ul></section>';
+  }
+  if (run){
+    const lvm = LIVE.on && LIVE.map[sel.r.id];
+    o += routeBlock({ rid:sel.r.id, fromI:sel.idx, toI:homeIdx(sel.r), homeMin:run.homeMin, liveFrom: lvm && useLive ? ln.i : null, liveTo: lvm ? lvm.homeI : null, title:"버스 타고 가는 길",
+      firstTxt: lv && lv.etaMs ? '실시간 ' + tl(msToMin(lv.etaMs)) + ' 도착' : '', lastTxt:'집 앞' });
+  }
+  if (sel.runs.length > 1){
+    o += '<section class="card"><div class="card-h"><h2>그 다음 ' + esc(sel.r.no) + '번</h2><span>' + esc(STOPS[sel.stop].name) + ' 시간표</span></div><ul class="deps">';
+    for (const x of sel.runs.slice(1, 4)) o += '<li><div class="row static"><span class="dt num"><small>' + (x.depMin >= 1440 ? "내일 " : "") + ampm(x.depMin) + '</small>' + hhmm(x.depMin) + '</span><span class="via">집 약 ' + tl(x.homeMin) + '</span><span class="dl">' + cd(x.depMs) + '</span></div></li>';
+    o += '</ul></section>';
+  }
+  return o + pickCard(false);
+}
+
+/* ---------- 화면: 시간표 ---------- */
+function viewTimes(){
+  const now = nowMin(), r = R(S.tt) || ROUTES[0];
+  let o = header("버스 시간표", "2024.1.1 시간표 · 매일 같은 시간");
+  o += '<div class="pills" role="group">' + ROUTES.map(x => '<button class="pill" data-act="tt" data-v="' + x.id + '" aria-pressed="' + (x.id === r.id) + '">' + x.no + '번<small>' + x.out + '</small></button>').join("") + '</div>';
+  const chips = arr => {
+    const nxt = arr.find(x => x.m >= now - 1);
+    const grp = (name, a) => a.length ? '<div class="half">' + name + '</div><div class="chips">' + a.map(x => '<div class="chip num' + (x === nxt ? ' nxt' : x.m < now - 1 ? ' past' : '') + '">' + hhmm(x.m) + (x.no ? '<small>' + x.no + '번</small>' : '') + '</div>').join('') + '</div>' : '';
+    return grp("오전", arr.filter(x => x.m < 720)) + grp("오후", arr.filter(x => x.m >= 720));
+  };
+  const base = r.times.map(norm).map(x => ({ m:hm(x.t), no:x.no })).sort((a, b) => a.m - b.m);
+  o += '<section class="card"><div class="tt-h"><span class="plate">' + r.no + '<small>번</small></span><div><div class="tt-t">' + r.out + '</div><div class="tt-s">' + esc(r.outNote) + '</div></div></div>' +
+    '<div class="half" style="color:var(--ink);font-size:15px">' + STOPS.home.name + '(집 앞) 출발</div>' + chips(base) + '</section>';
+  if (r.startExact){
+    const off = r.seq[0][1];
+    o += '<section class="card"><div class="tt-h"><span class="plate">' + r.no + '<small>번</small></span><div><div class="tt-t">집으로 오는 ' + r.no + '번</div><div class="tt-s">' + STOPS[r.seq[0][0]].name + ' 출발 → 집까지 약 ' + (-off) + '분</div></div></div>' +
+      chips(base.map(x => ({ m:x.m + off, no:x.no }))) + '</section>';
+  }
+  return o + '<p class="hint" style="padding:0 4px">중간 정류장은 교통 사정에 따라 3~5분 차이가 날 수 있어요. 미리 나가서 기다려 주세요.</p>';
+}
+
+/* ---------- 화면: 알림 ---------- */
+function viewAlerts(){
+  let o = header("알림", "버스 오기 전에 알려드려요");
+  const a = S.alarm;
+  if (a){
+    o += '<section class="card"><div class="card-h"><h2>지금 켜진 알림</h2><span>' + esc(a.stop) + '</span></div>' +
+      '<div class="rt"><span class="nm"><span class="plate">' + esc(a.no) + '<small>번</small></span></span><span class="dl" style="font-size:18px">' + cd(a.ms) + '</span></div>' +
+      '<div class="chips" style="margin-top:14px">' + ALERTS.map(m => '<div class="chip num' + (a.fired.has(m) ? ' past' : '') + '">' + m + '<small>분 전</small></div>').join("") + '</div>' +
+      '<button class="btn btn--on" data-act="alarmoff" style="width:100%;margin-top:14px">' + svg("bellOff") + '알림 끄기</button></section>';
+  } else o += '<section class="card empty"><b>켜진 알림이 없어요</b>아래에서 버스를 골라 알림을 켜세요</section>';
+  o += '<section class="card"><div class="card-h"><h2>집 앞에서 타는 버스</h2><span>눌러서 알림 켜기</span></div><ul class="deps">';
+  for (const r of ROUTES){
+    const x = nextFromHome(r.id); if (!x) continue;
+    const key = r.id + "|" + x.run.stop + "|" + x.run.depMs, on = a && a.key === key;
+    o += '<li><div class="row rt static"><span><span class="nm"><span class="plate sm">' + esc(x.run.no) + '</span>' + kindTag(r.out, r.outK) + '</span><span class="sub">' + (x.live ? '실시간' : tl(x.run.depMin)) + ' · ' + cd(x.ms) + '</span></span>' +
+      '<button class="btn ' + (on ? 'btn--on' : '') + '" style="min-height:42px;padding:8px 12px" data-act="alarm" data-key="' + esc(key) + '" data-ms="' + x.ms + '" data-no="' + esc(x.run.no) + '" data-stop="' + STOPS.home.name + '">' + svg(on ? "bellOff" : "bell") + (on ? '끄기' : '켜기') + '</button></div></li>';
+  }
+  o += '</ul></section>';
+  o += '<section class="card"><div class="card-h"><h2>알림 방식</h2></div>' +
+    (NATIVE ? '<p class="hint">설치한 앱이라서 <b>앱을 꺼도</b> 폰 알림과 진동이 와요. 알림이 늦게 오면 아래 버튼으로 "알람 및 리마인더"를 허용해 주세요.</p><div class="loc-act"><button class="btn" data-act="exactset">' + svg("gear") + '정확한 알림 허용</button></div>'
+      : '<p class="hint">웹에서는 <b>앱 화면이 켜져 있을 때</b> 알려드려요. 알림을 켜면 화면이 꺼지지 않게 유지해요. 앱을 꺼도 알림을 받으려면 설치 앱(APK)을 쓰세요.</p>') +
+    '<div class="loc-act"><button class="btn btn--ghost" data-act="testalert">' + svg("bell") + '알림 미리 듣기</button></div></section>';
+  return o;
+}
+
+/* ---------- 화면: 설정 ---------- */
+function segBtns(name, cur, opts){ return '<div class="seg" role="group">' + opts.map(([v, t]) => '<button data-act="set" data-k="' + name + '" data-v="' + v + '" aria-pressed="' + (String(cur) === String(v)) + '">' + t + '</button>').join("") + '</div>'; }
+function viewSettings(){
+  let o = header("설정", "앱 버전 " + APP_VER + (NATIVE ? " · 설치 앱" : PREVIEW ? " · 미리보기" : " · 웹"));
+  o += '<section class="card set"><div class="card-h"><h2>화면</h2></div>' +
+    '<div class="set-row"><div class="l"><b>사용 모드</b><span>편리: 큰 글씨 · 일반: 한눈에 많이</span></div>' + segBtns("mode", SET.mode || "easy", [["easy", "편리"], ["normal", "일반"]]) + '</div>' +
+    '<div class="set-row"><div class="l"><b>테마</b><span>자동은 폰 설정을 따라가요</span></div>' + segBtns("theme", SET.theme, [["auto", "자동"], ["light", "라이트"], ["dark", "다크"]]) + '</div>' +
+    '<div class="set-row"><div class="l"><b>집 → 정류장 걷는 시간</b><span>출발 안내 계산에 써요</span></div>' + segBtns("homeWalk", SET.homeWalk, [[3, "3분"], [5, "5분"], [8, "8분"], [10, "10분"]]) + '</div></section>';
+
+  // 소리
+  o += '<section class="card set"><div class="card-h"><h2>소리 · 목소리</h2></div>' +
+    '<div class="set-row"><div class="l"><b>알림 소리</b><span>효과음과 음성 안내</span></div>' + segBtns("sound", SET.sound, [["both", "둘 다"], ["voice", "음성"], ["chime", "효과음"], ["off", "진동만"]]) + '</div>' +
+    '<div class="set-row"><div class="l"><b>목소리 종류</b><span>AI 목소리가 훨씬 자연스러워요</span></div>' + segBtns("tts", SET.tts, [["google", "AI 목소리"], ["device", "폰 기본"]]) + '</div>';
+  if (SET.tts === "google"){
+    o += '<div class="stack"><b style="font-size:16px">AI 목소리 고르기</b>' +
+      '<select class="field" id="gvoice">' + GVOICES.map(([v, t]) => '<option value="' + v + '"' + (v === SET.gVoice ? ' selected' : '') + '>' + t + ' (' + v.split("-").pop() + ')</option>').join("") + '</select>' +
+      (bk(BUILD.gtts) && !SET.gKey ? '<p class="hint">앱에 AI 목소리 키가 들어 있어요.</p>' : '<input class="field" id="gkey" type="password" autocomplete="off" placeholder="Google Cloud API 키" value="' + esc(SET.gKey) + '">') +
+      (PREVIEW ? '<div class="note">Claude 미리보기에서는 AI 목소리 서버 연결이 막혀 있어서 폰 기본 목소리로 들려요. 설치 앱에서는 AI 목소리로 나와요.</div>' : '') +
+      (!PREVIEW && !gKey() ? '<p class="hint">구글 클라우드에서 Text-to-Speech API 키를 만들어 넣으세요. 이 앱 정도는 매달 무료 사용량 안에서 써요.</p>' : '') +
+      (aiErr ? '<div class="note"><b>AI 목소리 오류:</b> ' + esc(aiErr) + ' — 폰 기본 목소리로 대신 읽었어요.</div>' : '') + '</div>';
+  } else {
+    const vopts = voiceList.map(v => '<option value="' + esc(v.name) + '"' + (v.name === SET.voice ? ' selected' : '') + '>' + esc(v.name) + (v.local === false ? ' (온라인·고음질)' : '') + '</option>').join("");
+    o += '<div class="stack"><b style="font-size:16px">폰 목소리 고르기</b>' +
+      (vopts ? '<select class="field" id="voice"><option value="">자동 (가장 좋은 목소리)</option>' + vopts + '</select>' : '<p class="hint">이 기기에서 고를 수 있는 한국어 목소리를 찾지 못했어요.</p>') +
+      '<p class="hint">갤럭시 <b>설정 → 일반 → 텍스트 음성 변환</b>에서 엔진을 삼성 TTS나 Google로 바꾸고 고음질 한국어 음성을 받으면 더 자연스러워요.</p></div>';
+  }
+  o += '<div class="stack"><label class="hint" for="rate">말 빠르기 <b class="num" id="rateval">' + SET.rate.toFixed(1) + '</b></label><input id="rate" type="range" min="0.6" max="1.4" step="0.1" value="' + SET.rate + '">' +
+    '<div class="loc-act" style="margin:0"><button class="btn btn--pri" data-act="voicetest">' + svg("spk") + '목소리 들어보기</button><button class="btn btn--ghost" data-act="chimetest">효과음 듣기</button></div></div></section>';
+
+  // 실시간 버스
+  const builtIn = bk(BUILD.tago) && !SET.tagoKey;
+  o += '<section class="card set"><div class="card-h"><h2>실시간 버스</h2><span>' + (LIVE.on ? '연결됨' : PREVIEW ? '미리보기에선 꺼짐' : (tagoKey() || SET.proxy ? '연결 안 됨' : '꺼짐')) + '</span></div>';
+  if (PREVIEW){
+    o += '<div class="note"><b>Claude 미리보기에서는 실시간 연결이 막혀 있어요.</b> 보안상 이 화면에서는 외부 API를 부를 수 없어서 키가 맞아도 "연결 실패"가 떠요. 설치 앱(APK)에서는 정상으로 연결돼요.</div>';
+  } else {
+    o += '<p class="hint">' + (builtIn ? '앱에 공공데이터포털 서비스키가 들어 있어요. 다른 키를 쓰려면 아래에 넣으세요.' : '공공데이터포털(data.go.kr) <b>국토교통부_(TAGO)</b> 버스 API 4개를 활용신청하고 받은 일반 인증키를 넣으세요.') + '</p>' +
+      '<div class="stack"><input class="field" id="tagokey" type="password" autocomplete="off" placeholder="' + (builtIn ? '앱 기본 키 사용 중' : '서비스키') + '" value="' + esc(SET.tagoKey) + '">' +
+      '<input class="field" id="proxy" type="url" autocomplete="off" placeholder="(선택) 프록시 주소 — 웹에서 막힐 때만" value="' + esc(SET.proxy) + '">' +
+      '<div class="loc-act" style="margin:0"><button class="btn btn--pri" data-act="livesave">' + svg("re") + '저장하고 연결 테스트</button>' + (tagoKey() || SET.proxy ? '<button class="btn btn--ghost" data-act="liveoff">끄기</button>' : '') + '</div>' +
+      (LIVE.err ? '<div class="note"><b>연결 실패:</b> ' + esc(LIVE.err) + (/SERVICE_KEY|NOT_REGISTERED/i.test(LIVE.err) ? '<br>키를 받은 직후에는 1~2시간 뒤부터 돼요.' : '') + (/fetch|Load failed|NetworkError/i.test(LIVE.err) ? '<br>인터넷 연결을 확인하세요. 웹 주소에서 막히면 설치 앱을 쓰세요.' : '') + '</div>' : '') +
+      (S.liveLog.length ? '<pre class="log">' + esc(S.liveLog.slice(-14).join("\n")) + '</pre>' : '') + '</div>';
+  }
+  o += '</section>';
+  o += '<section class="card set"><div class="card-h"><h2>앱 정보</h2></div><p class="hint">시간표: 삼포교통(주) 2024.1.1 시간표 · 문의 055-832-1992<br>중간 정류장 시간과 위치는 예상값이에요. 실시간 버스가 연결되면 실제 값으로 바뀌어요.</p></section>';
+  return o;
+}
+
+/* ---------- 처음 실행: 모드 고르기 ---------- */
+function onboarding(){
+  const el = document.getElementById("sheet");
+  if (SET.mode){ el.innerHTML = ""; return; }
+  el.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="sheet-in"><h2>어떻게 쓰실 건가요?</h2><p class="hint">나중에 설정에서 언제든 바꿀 수 있어요.</p>' +
+    '<button class="choice" data-act="pickmode" data-v="easy"><span class="ic">' + svg("big") + '</span><span><b>편리 모드</b><span>큰 글씨, 한 번에 하나씩 쉽게</span></span></button>' +
+    '<button class="choice" data-act="pickmode" data-v="normal"><span class="ic">' + svg("eye") + '</span><span><b>일반 모드</b><span>한 화면에 버스 정보를 많이</span></span></button></div></div>';
+}
+
+/* ---------- 그리기 · 이동 ---------- */
+function applyLook(){
+  const root = document.documentElement;
+  root.classList.toggle("t-dark", SET.theme === "dark");
+  root.classList.toggle("t-light", SET.theme === "light");
+  document.body.classList.toggle("m-normal", SET.mode === "normal");
+  document.body.classList.toggle("m-easy", SET.mode !== "normal");
+}
+const TABS = [["main", "grid", "홈"], ["times", "cal", "시간표"], ["gohome", "home", "집 가는 버스"], ["alerts", "bell", "알림"], ["settings", "gear", "설정"]];
+function renderTabs(){
+  document.getElementById("tabs").innerHTML = TABS.map(([v, i, t]) => v === "gohome"
+    ? '<button class="tab tab--c" data-act="go" data-v="gohome"><span class="cbtn">' + svg(i, 2.2) + '</span>' + t + '</button>'
+    : '<button class="tab" data-act="go" data-v="' + v + '" aria-current="' + (S.view === v ? "page" : "false") + '">' + svg(i) + t + '</button>').join("");
+}
+function render(animate){
+  lastMin = nowMin();
+  NEED = { nodes:new Set(), routes:new Set() };
+  const v = S.view;
+  let html;
+  try {
+    html = v === "eup" ? viewEup() : v === "sam" ? viewSam() : v === "gohome" ? viewHome() : v === "times" ? viewTimes() : v === "alerts" ? viewAlerts() : v === "settings" ? viewSettings() : viewMain();
+  } catch (e) { html = '<section class="card empty"><b>화면을 그리다 문제가 생겼어요</b>' + esc(e.message) + '</section>'; }
+  $main.innerHTML = html;
+  if (animate){ $main.classList.remove("enter"); void $main.offsetWidth; $main.classList.add("enter"); }
+  renderTabs(); alarmBar();
+  if (LIVE.on && !LIVE.busy && Date.now() - LIVE.failAt > 20000 && ([...NEED.nodes].some(n => !fresh(LIVE.arr[n])) || [...NEED.routes].some(r => !fresh(LIVE.bus[r])))){
+    clearTimeout(LIVE.t); LIVE.t = setTimeout(() => { lastLive = Date.now(); liveRefresh(); }, 80);
+  }
+  const rate = document.getElementById("rate");
+  if (rate) rate.oninput = () => { SET.rate = +rate.value; document.getElementById("rateval").textContent = SET.rate.toFixed(1); saveSet(); };
+  const gv = document.getElementById("gvoice");
+  if (gv) gv.onchange = () => { SET.gVoice = gv.value; saveSet(); speak("안녕하세요. 230번 버스가 10분 뒤에 와요.", true); };
+  const gk = document.getElementById("gkey");
+  if (gk) gk.onchange = () => { SET.gKey = gk.value.trim(); saveSet(); aiErr = ""; speak("AI 목소리가 연결됐어요.", true); };
+  const vs = document.getElementById("voice");
+  if (vs) vs.onchange = () => { SET.voice = vs.value; saveSet(); speak("이 목소리로 알려드릴게요.", true); };
+}
+let lastLive = 0;
+function tick(){
+  if (nowMin() !== lastMin){ render(); return; }
+  const now = Date.now();
+  document.querySelectorAll("[data-cd]").forEach(el => { el.innerHTML = fmtLeft(+el.dataset.cd - now, el.dataset.fmt); });
+  document.querySelectorAll("[data-ring]").forEach(el => {
+    const C = 2 * Math.PI * 95, f = Math.min(Math.max(+el.dataset.ring - now, 0), 3600000) / 3600000;
+    el.setAttribute("stroke-dashoffset", (C * (1 - f)).toFixed(1));
+  });
+  checkAlarm();
+  if (LIVE.on && now - lastLive > 25000 && ["main", "eup", "sam", "gohome", "alerts"].includes(S.view)){ lastLive = now; liveRefresh(); }
+}
+const VIEWS = ["main", "eup", "sam", "gohome", "times", "alerts", "settings"];
+function resetHome(){ S.pos = null; S.homeSel = null; S.locErr = false; S.locating = false; }
+function nav(v, push){
+  v = VIEWS.includes(v) ? v : "main";
+  if (v === S.view && push !== false){ window.scrollTo({ top:0, behavior:"smooth" }); return; }
+  if (S.view === "gohome" && v !== "gohome") resetHome();
+  stopSpeak();
+  S.view = v; S.tlOpen = false;
+  if (push !== false){ try { history.pushState({ v }, "", "#" + v); depth++; } catch (e) {} }
+  render(true); window.scrollTo(0, 0);
+  lastLive = 0;
+  if (v === "gohome" && !S.pos && !S.locating) locate();
+}
+async function locate(){
+  S.locating = true; S.locErr = false; S.homeSel = null; render();
+  const done = (pos, err) => { S.locating = false; if (pos){ S.pos = { lat:pos.lat, lng:pos.lng, src:"gps" }; S.locErr = false; } else S.locErr = err || true; render(true); lastLive = 0; };
+  if (NATIVE && plug("Geolocation")){
+    const G = plug("Geolocation");
+    try {
+      let p = await G.checkPermissions();
+      if (p.location !== "granted") p = await G.requestPermissions();
+      if (p.location === "denied") return done(null, "위치 권한이 꺼져 있어요. 폰 설정 → 애플리케이션 → 할머니 버스 → 권한에서 위치를 허용해 주세요.");
+      const r = await G.getCurrentPosition({ enableHighAccuracy:true, timeout:12000, maximumAge:20000 });
+      return done({ lat:r.coords.latitude, lng:r.coords.longitude });
+    } catch (e) { return done(null, "위치를 못 찾았어요. GPS를 켜고 다시 눌러주세요."); }
+  }
+  if (!("geolocation" in navigator)) return done(null);
+  let fin = false;
+  const timer = setTimeout(() => { if (!fin){ fin = true; done(null, "위치를 찾는 데 시간이 너무 걸려요. GPS를 켜고 다시 눌러주세요."); } }, 13000);
+  try {
+    navigator.geolocation.getCurrentPosition(pos => { if (fin) return; fin = true; clearTimeout(timer); done({ lat:pos.coords.latitude, lng:pos.coords.longitude }); },
+      err => { if (fin) return; fin = true; clearTimeout(timer); done(null, err && err.code === 1 ? "위치 사용이 막혀 있어요. 위치를 허용하거나 아래에서 지금 계신 곳을 골라주세요." : null); },
+      { enableHighAccuracy:true, timeout:12000, maximumAge:20000 });
+  } catch (e) { fin = true; clearTimeout(timer); done(null); }
+}
+function openExternal(url){
+  S.extNav = true;
+  if (NATIVE){ window.location.href = url; return; }
+  const w = window.open(url, "_blank", "noopener");
+  if (!w){ const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove(); }
+}
+window.addEventListener("popstate", e => {
+  depth = Math.max(0, depth - 1);
+  const v = VIEWS.includes(e.state && e.state.v) ? e.state.v : "main";
+  if (S.view === "gohome" && v !== "gohome") resetHome();
+  S.view = v; S.tlOpen = false; render(true);
+});
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const a = el.dataset.act, v = el.dataset.v;
+  if (a === "go"){ if (el.dataset.sel && v === "eup") S.eupSel = el.dataset.sel; nav(v); }
+  else if (a === "back"){ if (depth > 0){ try { history.back(); return; } catch (err) {} } nav("main", false); }
+  else if (a === "eupsel"){ S.eupSel = v; S.tlOpen = false; render(true); window.scrollTo({ top:0, behavior:"smooth" }); }
+  else if (a === "homesel"){ S.homeSel = v; S.tlOpen = false; render(); }
+  else if (a === "locate") locate();
+  else if (a === "place"){ const p = PLACES[+v]; S.pos = { lat:p.lat, lng:p.lng, src:"pick", name:p.name }; S.homeSel = null; S.locErr = false; render(true); window.scrollTo(0, 0); }
+  else if (a === "stopplace"){ const s = STOPS[v]; S.pos = { lat:s.lat, lng:s.lng, src:"pick", name:s.name + " 정류장" }; S.homeSel = null; S.locErr = false; render(true); window.scrollTo(0, 0); }
+  else if (a === "route") openExternal(el.dataset.url);
+  else if (a === "tl"){ S.tlOpen = !S.tlOpen; render(); }
+  else if (a === "speak") speak(S.speech, true);
+  else if (a === "alarm") toggleAlarm(el.dataset);
+  else if (a === "alarmoff"){ clearAlarm("알림을 껐어요"); render(); }
+  else if (a === "toastclose") document.getElementById("toast").hidden = true;
+  else if (a === "tt"){ S.tt = v; render(); }
+  else if (a === "set"){ const k = el.dataset.k; SET[k] = k === "homeWalk" ? +v : v; saveSet(); applyLook(); render(); }
+  else if (a === "pickmode"){ SET.mode = v; saveSet(); applyLook(); onboarding(); render(true); }
+  else if (a === "voicetest"){ const gk2 = document.getElementById("gkey"); if (gk2){ SET.gKey = gk2.value.trim(); saveSet(); } speak("230번 버스가 10분 뒤에 와요. 삼정그린코아 정류장이에요.", true); }
+  else if (a === "chimetest") chime(true);
+  else if (a === "testalert"){
+    buzz(); chime(); toast("230번 버스가 10분 뒤에 와요", "알림 미리 듣기");
+    setTimeout(() => speak("230번 버스가 10분 뒤에 와요. 삼정그린코아 정류장이에요."), SET.sound === "both" ? 900 : 0);
+    if (NATIVE && LN()) nativePrep().then(() => LN().schedule({ notifications:[{ id:9, title:"알림 테스트", body:"이렇게 폰 알림이 와요", channelId:"bus-alert", schedule:{ at:new Date(Date.now() + 4000), allowWhileIdle:true } }] })).catch(() => {});
+  }
+  else if (a === "exactset"){ const ln = LN(); if (ln && ln.changeExactNotificationSetting) ln.changeExactNotificationSetting().catch(() => {}); }
+  else if (a === "livesave"){
+    SET.tagoKey = (document.getElementById("tagokey").value || "").trim(); SET.proxy = (document.getElementById("proxy").value || "").trim(); SET.liveOff = false; saveSet();
+    S.liveLog = []; LIVE.err = ""; toast("실시간 버스 연결 중…");
+    liveInit(true).then(ok => { toast(ok ? "실시간 버스가 연결됐어요" : "연결 실패", ok ? "" : LIVE.err); lastLive = 0; render(); });
+    render();
+  }
+  else if (a === "liveoff"){ SET.tagoKey = ""; SET.proxy = ""; SET.liveOff = true; saveSet(); LIVE.on = false; LIVE.map = {}; store.set("busapp.live", null); render(); }
+});
+function onHide(){ S.hiddenAt = Date.now(); }
+function onShow(){
+  if (S.hiddenAt && !S.extNav && Date.now() - S.hiddenAt > 60000 && S.view === "gohome") resetHome();
+  S.extNav = false; S.hiddenAt = 0;
+  render(); if (S.alarm) wakeOn(); lastLive = 0;
+}
+document.addEventListener("visibilitychange", () => { if (document.hidden) onHide(); else onShow(); });
+if (NATIVE && plug("App")){ try { plug("App").addListener("appStateChange", st => { if (st.isActive) onShow(); else onHide(); }); } catch (e) {} }
+if (window.BUS_HOSTED && !NATIVE && "serviceWorker" in navigator){ try { navigator.serviceWorker.register("sw.js").catch(() => {}); } catch (e) {} }
+
+/* 시작 */
+(function init(){
+  const saved = store.get("busapp.alarm", null);
+  if (saved && saved.ms > Date.now() - 60000) S.alarm = Object.assign(saved, { fired:new Set(saved.fired || []) });
+  const h0 = (location.hash || "").slice(1);
+  S.view = VIEWS.includes(h0) ? h0 : "main";
+  applyLook(); render(true); onboarding();
+  loadVoices().then(() => { if (S.view === "settings") render(); });
+  if (S.view === "gohome") locate();
+  if (tagoKey() || SET.proxy) liveInit(false).then(() => { lastLive = 0; render(); });
+  setInterval(tick, 1000);
+})();
+</script>
+</body></html>
