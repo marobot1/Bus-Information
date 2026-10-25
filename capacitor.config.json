@@ -1,0 +1,16 @@
+{
+  "appId": "kr.family.grandmabus",
+  "appName": "버스친구",
+  "webDir": "docs",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
+    "LocalNotifications": {
+      "iconColor": "#2F62F5"
+    }
+  }
+}

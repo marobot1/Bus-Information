@@ -1,0 +1,86 @@
+name: APK 빌드
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    # 안드로이드 SDK가 미리 깔린 안정 버전 서버로 고정 (ubuntu-latest는 26으로 바뀌는 중)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: 안드로이드 SDK 확인
+        run: |
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          echo "SDK: $SDK"
+          test -d "$SDK"
+          echo "sdk.dir=$SDK" > android/local.properties
+          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - name: 패키지 설치
+        run: npm ci
+
+      - name: 웹 파일을 앱에 복사
+        run: npx cap sync android
+
+      - name: 키 넣기 (GitHub 시크릿 → 앱 안에만)
+        env:
+          TAGO_KEY: ${{ secrets.TAGO_KEY }}
+          GTTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+        run: |
+          F=android/app/src/main/assets/public/index.html
+          T=$(printf %s "$TAGO_KEY" | tr -d '\r\n ')
+          G=$(printf %s "$GTTS_KEY" | tr -d '\r\n ')
+          if [ -n "$T" ]; then sed -i "s|__TAGO_KEY__|$T|" "$F"; echo "실시간 버스 키 넣음"; else echo "::warning::TAGO_KEY 시크릿이 없어요"; fi
+          if [ -n "$G" ]; then sed -i "s|__GTTS_KEY__|$G|" "$F"; echo "AI 목소리 키 넣음"; fi
+
+      - name: 서명 키 준비
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > android/app/bus-release.keystore
+            echo "고정 서명 키 사용"
+          else
+            echo "::warning::KEYSTORE_B64 시크릿이 없어서 임시 키로 서명해요"
+          fi
+
+      - name: APK 만들기
+        working-directory: android
+        env:
+          KS_PASS: ${{ secrets.KS_PASS }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: 파일 이름 정리
+        run: cp android/app/build/outputs/apk/release/app-release.apk busfriend.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: busfriend-apk
+          path: busfriend.apk
+
+      - name: 릴리스에 올리기 (폰에서 바로 받기)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v2.2.${{ github.run_number }}
+          name: 버스친구 2.2.${{ github.run_number }}
+          files: busfriend.apk
+          make_latest: true
