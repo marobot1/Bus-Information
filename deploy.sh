@@ -25,14 +25,17 @@ git remote get-url origin >/dev/null 2>&1 || git remote add origin "https://gith
 [ -s tago.key ]       && gh secret set TAGO_KEY       -R "$FULL" < tago.key
 [ -s google-tts.key ] && gh secret set GOOGLE_TTS_KEY -R "$FULL" < google-tts.key
 
-# 4) 올리기 → APK 자동 빌드
+# 4) GitHub에만 있는 변경을 먼저 합치고 → 올리기 → APK 자동 빌드
+if git fetch -q origin main 2>/dev/null; then
+  git -c user.name="$OWNER" -c user.email="$OWNER@users.noreply.github.com" merge -q origin/main -X ours --allow-unrelated-histories -m "GitHub 변경 합치기" || true
+fi
 git push -u origin main
 gh api -X POST "repos/$FULL/pages" -f "source[branch]=main" -f "source[path]=/docs" >/dev/null 2>&1 || true
 
 echo "- 앱 만드는 중 (약 5분)…"
 SHA=$(git rev-parse HEAD); RUN=""
 for i in $(seq 1 30); do
-  RUN=$(gh run list -R "$FULL" --commit "$SHA" -L 1 --json databaseId -q '.[0].databaseId' 2>/dev/null || true)
+  RUN=$(gh run list -R "$FULL" -w apk.yml --commit "$SHA" -L 1 --json databaseId -q '.[0].databaseId' 2>/dev/null || true)
   [ -n "$RUN" ] && break; sleep 4
 done
 [ -z "$RUN" ] && { echo "[!] 빌드를 못 찾았어요: https://github.com/$FULL/actions"; exit 1; }
