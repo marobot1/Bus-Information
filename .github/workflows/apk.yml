@@ -43,12 +43,15 @@ jobs:
         env:
           TAGO_KEY: ${{ secrets.TAGO_KEY }}
           GTTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+          KAKAO_KEY: ${{ secrets.KAKAO_KEY }}
         run: |
           F=android/app/src/main/assets/public/index.html
           T=$(printf %s "$TAGO_KEY" | tr -d '\r\n ')
           G=$(printf %s "$GTTS_KEY" | tr -d '\r\n ')
           if [ -n "$T" ]; then sed -i "s|__TAGO_KEY__|$T|" "$F"; echo "실시간 버스 키 넣음"; else echo "::warning::TAGO_KEY 시크릿이 없어요"; fi
           if [ -n "$G" ]; then sed -i "s|__GTTS_KEY__|$G|" "$F"; echo "AI 목소리 키 넣음"; fi
+          K=$(printf %s "$KAKAO_KEY" | tr -d '\r\n ')
+          if [ -n "$K" ]; then sed -i "s|__KAKAO_KEY__|$K|" "$F"; echo "카카오 지도 키 넣음"; fi
 
       - name: 서명 키 준비
         env:
@@ -80,7 +83,7 @@ jobs:
       - name: 릴리스에 올리기 (폰에서 바로 받기)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.5.${{ github.run_number }}
-          name: 버스친구 2.5.${{ github.run_number }}
+          tag_name: v2.6.${{ github.run_number }}
+          name: 버스친구 2.6.${{ github.run_number }}
           files: busfriend.apk
           make_latest: true

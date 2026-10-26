@@ -24,6 +24,7 @@ git remote get-url origin >/dev/null 2>&1 || git remote add origin "https://gith
 [ -s ks.b64 ]         && gh secret set KEYSTORE_B64   -R "$FULL" < ks.b64
 [ -s tago.key ]       && gh secret set TAGO_KEY       -R "$FULL" < tago.key
 [ -s google-tts.key ] && gh secret set GOOGLE_TTS_KEY -R "$FULL" < google-tts.key
+[ -s kakao.key ]      && gh secret set KAKAO_KEY      -R "$FULL" < kakao.key
 
 # 4) GitHub에만 있는 변경을 먼저 합치고 → 올리기 → APK 자동 빌드
 if git fetch -q origin main 2>/dev/null; then
