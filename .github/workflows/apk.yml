@@ -83,7 +83,7 @@ jobs:
       - name: 릴리스에 올리기 (폰에서 바로 받기)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.6.${{ github.run_number }}
-          name: 버스친구 2.6.${{ github.run_number }}
+          tag_name: v2.7.${{ github.run_number }}
+          name: 버스친구 2.7.${{ github.run_number }}
           files: busfriend.apk
           make_latest: true
